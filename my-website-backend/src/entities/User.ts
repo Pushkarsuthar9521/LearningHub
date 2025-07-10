@@ -9,7 +9,7 @@ import {
 } from 'typeorm'
 import { Blog } from './Blog'
 import { Quiz } from './Quiz'
-import { QuizAttempt } from './QuizAttempt'
+import { QuizAttempt } from './QuizAttempts'
 
 export enum UserRole {
   ADMIN = 'admin',

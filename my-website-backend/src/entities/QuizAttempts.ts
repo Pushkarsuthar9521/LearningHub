@@ -1,3 +1,4 @@
+import { GraphQLJSONObject } from 'graphql-type-json';
 import { Field, Float, ID, Int, ObjectType } from 'type-graphql'
 
 import {
@@ -40,7 +41,7 @@ export class QuizAttempt extends BaseEntity {
   @Column({ nullable: true })
   timeSpent: number // in seconds
 
-  @Field()
+  @Field(() => GraphQLJSONObject)
   @Column({ type: 'jsonb' })
   userAnswers: Record<string, string> // questionId -> answerId
 

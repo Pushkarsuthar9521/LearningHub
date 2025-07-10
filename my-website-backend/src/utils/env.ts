@@ -15,6 +15,9 @@ const envSchema = z.object({
   REDIS_URL: z.string().optional(),
   JWT_SECRET: z.string().min(32).optional(),
 
+  // CORS variables
+  CORS_ORIGIN: z.string().optional(),
+
   // Boolean variables
   ENABLE_LOGGING: z.coerce.boolean().default(false),
 

@@ -1,35 +1,40 @@
+import 'reflect-metadata';
+import { ApolloServer } from '@apollo/server'
+import { expressMiddleware } from '@apollo/server/express4'
+import cors from 'cors'
 import express, { Response } from 'express'
+import http from 'http'
+import { buildSchema } from 'type-graphql'
+import { HelloResolver } from './graphql/resolvers/helloResolver'
 import { AppDataSource } from './utils/dataSource'
 import { env } from './utils/env'
-// import { redisClient } from './redisClient'
 
 const main = async () => {
   await AppDataSource.initialize()
   const app = express()
+  const httpServer = http.createServer(app)
   const PORT = env.PORT
-  // app.use(
-  //   session({
-  //     store: new RedisStore({ client: redisClient }),
-  //     secret: process.env.SESSION_SECRET || 'supersecret',
-  //     resave: false,
-  //     saveUninitialized: false,
-  //     cookie: {
-  //       secure: process.env.NODE_ENV === 'production', // Set to true in production (requires HTTPS)
-  //       httpOnly: true,
-  //       maxAge: Number(process.env.SESSION_TTL) * 1000 // Convert seconds to milliseconds
-  //     }
-  //   })
-  // )
-  // let origin: string | string[] = env.CORS_ORIGIN
-  // if (origin.includes(',')) origin = origin.split(',')
-  // app.use(authSessionMiddleware())
-  app.use(express.json())
-  // app.use(
-  //   cors({
-  //     origin,
-  //     credentials: true
-  //   })
-  // )
+
+  const schema = await buildSchema({
+    resolvers: [HelloResolver]
+  })
+
+  const apolloServer = new ApolloServer({
+    schema
+  })
+
+  await apolloServer.start()
+
+  app.use(
+    '/graphql',
+    cors<cors.CorsRequest>({
+      origin: env.CORS_ORIGIN,
+      credentials: true
+    }),
+    express.json(),
+    expressMiddleware(apolloServer)
+  )
+
   app.get('/', (_, res: Response) => {
     res.send('Hello, Ai')
   })
@@ -38,8 +43,9 @@ const main = async () => {
     res.json({ health: 'ok' })
     return
   })
-  app.listen(PORT, () => {
-    console.info(`Server is running on http://localhost:${PORT}`)
-  })
+
+  await new Promise<void>(resolve => httpServer.listen({ port: PORT }, resolve))
+  console.info(`Server is running on http://localhost:${PORT}/graphql`)
 }
+
 main()

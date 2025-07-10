@@ -10,7 +10,7 @@ import {
   UpdateDateColumn
 } from 'typeorm'
 import { Question } from './Question'
-import { QuizAttempt } from './QuizAttempt'
+import { QuizAttempt } from './QuizAttempts'
 import { User } from './User'
 
 export enum QuizDifficulty {
