@@ -13,7 +13,7 @@ const envSchema = z.object({
 
   // Optional variables
   REDIS_URL: z.string().optional(),
-  JWT_SECRET: z.string().min(32).optional(),
+  JWT_SECRET: z.string().min(32),
 
   // CORS variables
   CORS_ORIGIN: z.string().optional(),
@@ -24,6 +24,8 @@ const envSchema = z.object({
   // API Keys (optional)
   OPENAI_API_KEY: z.string().min(1).optional(),
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
+
+  // JWT configuration
 
   // Email config
   SMTP_HOST: z.string().optional(),

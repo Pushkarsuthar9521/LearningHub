@@ -1,11 +1,14 @@
-import 'reflect-metadata';
 import { ApolloServer } from '@apollo/server'
 import { expressMiddleware } from '@apollo/server/express4'
 import cors from 'cors'
-import express, { Response } from 'express'
+import express from 'express'
 import http from 'http'
+import jwt from 'jsonwebtoken'
+import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { HelloResolver } from './graphql/resolvers/helloResolver'
+import { MyContext } from './types/MyContext'
+import { authChecker } from './utils/authChecker'
 import { AppDataSource } from './utils/dataSource'
 import { env } from './utils/env'
 
@@ -16,10 +19,11 @@ const main = async () => {
   const PORT = env.PORT
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver]
+    resolvers: [HelloResolver],
+    authChecker
   })
 
-  const apolloServer = new ApolloServer({
+  const apolloServer = new ApolloServer<MyContext>({
     schema
   })
 
@@ -32,12 +36,24 @@ const main = async () => {
       credentials: true
     }),
     express.json(),
-    expressMiddleware(apolloServer)
+    expressMiddleware(apolloServer, {
+      context: async ({ req }) => {
+        const token = req.headers.authorization?.split(' ')?.[1]
+        if (token) {
+          try {
+            const payload = jwt.verify(
+              token,
+              env.JWT_SECRET
+            ) as MyContext['payload']
+            return { payload }
+          } catch (err) {
+            console.error('Invalid token')
+          }
+        }
+        return {}
+      }
+    })
   )
-
-  app.get('/', (_, res: Response) => {
-    res.send('Hello, Ai')
-  })
 
   app.get('/health-check', (_, res) => {
     res.json({ health: 'ok' })
