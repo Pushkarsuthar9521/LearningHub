@@ -6,7 +6,9 @@ import http from 'http'
 import jwt from 'jsonwebtoken'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
+import { BlogResolver } from './graphql/resolvers/blogResolver'
 import { HelloResolver } from './graphql/resolvers/helloResolver'
+import { UserResolver } from './graphql/resolvers/userResolver'
 import { MyContext } from './types/MyContext'
 import { authChecker } from './utils/authChecker'
 import { AppDataSource } from './utils/dataSource'
@@ -19,7 +21,7 @@ const main = async () => {
   const PORT = env.PORT
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver],
+    resolvers: [HelloResolver, UserResolver, BlogResolver],
     authChecker
   })
 

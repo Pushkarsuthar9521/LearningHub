@@ -1,4 +1,4 @@
-import { Query, Resolver, Authorized, Ctx } from 'type-graphql'
+import { Authorized, Ctx, Query, Resolver } from 'type-graphql'
 import { MyContext } from '../../types/MyContext'
 
 @Resolver()
@@ -11,6 +11,6 @@ export class HelloResolver {
   @Authorized()
   @Query(() => String)
   protectedQuery(@Ctx() { payload }: MyContext): string {
-    return `Your user id is ${payload.userId}`
+    return `Your user id is ${payload?.userId}`
   }
 }

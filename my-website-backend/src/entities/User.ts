@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType, registerEnumType } from 'type-graphql'
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -23,7 +24,7 @@ registerEnumType(UserRole, {
 
 @ObjectType()
 @Entity('users')
-export class User {
+export class User extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string

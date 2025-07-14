@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -14,7 +15,7 @@ import { Quiz } from './Quiz'
 
 @ObjectType()
 @Entity('questions')
-export class Question {
+export class Question extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
