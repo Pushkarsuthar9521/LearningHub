@@ -1,4 +1,12 @@
-import { Arg, Authorized, Ctx, ID, Mutation, Query, Resolver } from 'type-graphql'
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  ID,
+  Mutation,
+  Query,
+  Resolver
+} from 'type-graphql'
 import { Blog } from '../../entities/Blog'
 import { BlogInput } from '../../types/BlogInput'
 import { MyContext } from '../../types/MyContext'
@@ -15,13 +23,13 @@ export class BlogResolver {
     return await Blog.findOne({ where: { id }, relations: ['author'] })
   }
 
-  @Authorized()
+  // @Authorized()
   @Mutation(() => Blog)
   async createBlog(
     @Arg('input') input: BlogInput,
     @Ctx() { payload }: MyContext
   ): Promise<Blog> {
-    const blog = Blog.create({ ...input, authorId: payload.userId })
+    const blog = Blog.create({ ...input, authorId: payload?.userId })
     await blog.save()
     return blog
   }
@@ -33,7 +41,9 @@ export class BlogResolver {
     @Arg('input') input: BlogInput,
     @Ctx() { payload }: MyContext
   ): Promise<Blog | null> {
-    const blog = await Blog.findOne({ where: { id, authorId: payload.userId } })
+    const blog = await Blog.findOne({
+      where: { id, authorId: payload?.userId }
+    })
     if (!blog) return null
 
     Object.assign(blog, input)
@@ -47,7 +57,9 @@ export class BlogResolver {
     @Arg('id', () => ID) id: string,
     @Ctx() { payload }: MyContext
   ): Promise<boolean> {
-    const blog = await Blog.findOne({ where: { id, authorId: payload.userId } })
+    const blog = await Blog.findOne({
+      where: { id, authorId: payload?.userId }
+    })
     if (!blog) return false
 
     await blog.remove()

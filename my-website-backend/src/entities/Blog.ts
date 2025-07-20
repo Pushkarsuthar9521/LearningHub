@@ -33,9 +33,9 @@ export class Blog extends BaseEntity {
   @Column()
   title: string
 
-  @Field()
-  @Column({ unique: true })
-  slug: string
+  @Field({ nullable: true })
+  @Column({ unique: true, nullable: true })
+  slug?: string
 
   @Field()
   @Column('text')
@@ -86,11 +86,12 @@ export class Blog extends BaseEntity {
   updatedAt: Date
 
   // Relations
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, user => user.blogs)
   @JoinColumn({ name: 'authorId' })
-  author: User
+  author?: User
 
-  @Column('uuid')
-  authorId: string
+  @Field(() => String, { nullable: true })
+  @Column('uuid', { nullable: true })
+  authorId?: string
 }
