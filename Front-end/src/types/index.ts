@@ -1,9 +1,7 @@
 export interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
-  avatar: string;
-  role: 'admin' | 'user';
 }
 
 export interface Category {

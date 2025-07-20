@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, BookOpen, GraduationCap } from 'lucide-react';
-import Button from '../ui/Button';
+import { BookOpen, Menu, Search, X } from 'lucide-react'
+import React, { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import Button from '../ui/Button'
 
 const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const location = useLocation()
 
   const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+    return location.pathname === path
+  }
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+    setIsMenuOpen(!isMenuOpen)
+  }
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -27,21 +27,33 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/blog" 
-              className={`text-base font-medium ${isActive('/blog') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}
+            <Link
+              to="/blog"
+              className={`text-base font-medium ${
+                isActive('/blog')
+                  ? 'text-blue-600'
+                  : 'text-gray-700 hover:text-blue-600'
+              } transition-colors`}
             >
               Blog
             </Link>
-            <Link 
-              to="/quizzes" 
-              className={`text-base font-medium ${isActive('/quizzes') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}
+            <Link
+              to="/quizzes"
+              className={`text-base font-medium ${
+                isActive('/quizzes')
+                  ? 'text-blue-600'
+                  : 'text-gray-700 hover:text-blue-600'
+              } transition-colors`}
             >
               Quizzes
             </Link>
-            <Link 
-              to="/categories" 
-              className={`text-base font-medium ${isActive('/categories') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}
+            <Link
+              to="/categories"
+              className={`text-base font-medium ${
+                isActive('/categories')
+                  ? 'text-blue-600'
+                  : 'text-gray-700 hover:text-blue-600'
+              } transition-colors`}
             >
               Categories
             </Link>
@@ -49,8 +61,8 @@ const Header: React.FC = () => {
 
           {/* Right section */}
           <div className="hidden md:flex items-center space-x-4">
-            <button 
-              aria-label="Search" 
+            <button
+              aria-label="Search"
               className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-gray-100 transition-colors"
             >
               <Search className="h-5 w-5" />
@@ -67,7 +79,11 @@ const Header: React.FC = () => {
               className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-gray-100 transition-colors"
               onClick={toggleMenu}
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -77,23 +93,35 @@ const Header: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-md">
-            <Link 
-              to="/blog" 
-              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/blog') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'} transition-colors`}
+            <Link
+              to="/blog"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActive('/blog')
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+              } transition-colors`}
               onClick={() => setIsMenuOpen(false)}
             >
               Blog
             </Link>
-            <Link 
-              to="/quizzes" 
-              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/quizzes') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'} transition-colors`}
+            <Link
+              to="/quizzes"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActive('/quizzes')
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+              } transition-colors`}
               onClick={() => setIsMenuOpen(false)}
             >
               Quizzes
             </Link>
-            <Link 
-              to="/categories" 
-              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/categories') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'} transition-colors`}
+            <Link
+              to="/categories"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActive('/categories')
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+              } transition-colors`}
               onClick={() => setIsMenuOpen(false)}
             >
               Categories
@@ -109,7 +137,7 @@ const Header: React.FC = () => {
         </div>
       )}
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

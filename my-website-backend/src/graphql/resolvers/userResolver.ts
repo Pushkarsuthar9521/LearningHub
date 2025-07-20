@@ -1,10 +1,40 @@
 import bcrypt from 'bcryptjs'
-import { Arg, Authorized, ID, Mutation, Query, Resolver } from 'type-graphql'
+import jwt from 'jsonwebtoken'
+import { Arg, Authorized, Ctx, ID, Mutation, Query, Resolver } from 'type-graphql'
 import { User } from '../../entities/User'
+import {
+  AuthResponse,
+  LoginInput,
+  RegisterInput
+} from '../../types/AuthInput'
+import { MyContext } from '../../types/MyContext'
 import { UserInput } from '../../types/UserInput'
+import { env } from '../../utils/env'
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => AuthResponse)
+  async login(
+    @Arg('input') { email, password }: LoginInput,
+    @Ctx() { res }: MyContext
+  ): Promise<AuthResponse> {
+    const user = await User.findOne({ where: { email } })
+    if (!user) {
+      throw new Error('Invalid credentials')
+    }
+
+    const isValid = await bcrypt.compare(password, user.password)
+    if (!isValid) {
+      throw new Error('Invalid credentials')
+    }
+
+    const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
+      expiresIn: '1d'
+    })
+
+    return { token, user }
+  }
+
   @Authorized()
   @Query(() => [User])
   async getUsers(): Promise<User[]> {
@@ -17,7 +47,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  async createUser(@Arg('input') input: UserInput): Promise<User> {
+  async createUser(@Arg('input') input: RegisterInput): Promise<User> {
     const hashedPassword = await bcrypt.hash(input.password, 10)
     const user = User.create({ ...input, password: hashedPassword })
     await user.save()
