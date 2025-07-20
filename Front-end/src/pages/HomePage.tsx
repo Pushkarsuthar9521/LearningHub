@@ -1,14 +1,13 @@
 import { ArrowRight, BookOpen, GraduationCap, Search } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BlogCard from '../components/blog/BlogCard'
-import Layout from '../components/layout/Layout'
 import QuizCard from '../components/quiz/QuizCard'
 import Button from '../components/ui/Button'
 import useBlogStore from '../store/blogStore'
 import useQuizStore from '../store/quizStore'
 
-const HomePage: React.FC = () => {
+const HomePage: FC = () => {
   const { posts, fetchPosts } = useBlogStore()
   const { quizzes, fetchQuizzes } = useQuizStore()
 
@@ -18,7 +17,7 @@ const HomePage: React.FC = () => {
   }, [fetchPosts, fetchQuizzes])
 
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16 sm:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,7 +213,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   )
 }
 

@@ -5,6 +5,7 @@ import BlogPostPage from './pages/BlogPostPage'
 import QuizzesPage from './pages/QuizzesPage'
 import QuizPage from './pages/QuizPage'
 import { LoginPage } from './pages/LoginPage'
+import { SignUpPage } from './pages/SignUpPage'
 import App from './App'
 
 export const router = createBrowserRouter([
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />
+      },
+      {
+        path: 'signup',
+        element: <SignUpPage />
       },
       {
         path: 'blog',

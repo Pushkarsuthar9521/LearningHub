@@ -36,6 +36,15 @@ export class UserResolver {
   }
 
   @Authorized()
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { payload }: MyContext): Promise<User | null> {
+    if (!payload?.userId) {
+      return null
+    }
+    return User.findOne({ where: { id: payload.userId } })
+  }
+
+  @Authorized()
   @Query(() => [User])
   async getUsers(): Promise<User[]> {
     return await User.find()
@@ -46,12 +55,22 @@ export class UserResolver {
     return await User.findOne({ where: { id } })
   }
 
-  @Mutation(() => User)
-  async createUser(@Arg('input') input: RegisterInput): Promise<User> {
+  @Mutation(() => AuthResponse)
+  async register(@Arg('input') input: RegisterInput): Promise<AuthResponse> {
+    const existingUser = await User.findOne({ where: { email: input.email } })
+    if (existingUser) {
+      throw new Error('Email is already in use')
+    }
+
     const hashedPassword = await bcrypt.hash(input.password, 10)
     const user = User.create({ ...input, password: hashedPassword })
     await user.save()
-    return user
+
+    const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
+      expiresIn: '1d'
+    })
+
+    return { token, user }
   }
 
   @Mutation(() => User, { nullable: true })

@@ -1,19 +1,43 @@
-import { BookOpen, Menu, Search, X } from 'lucide-react'
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import Button from '../ui/Button'
+import { BookOpen, Menu, Search, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
+import { Avatar, Button, Dropdown, Menu as AntMenu } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 
 const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const location = useLocation()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   const isActive = (path: string) => {
-    return location.pathname === path
-  }
+    return location.pathname === path;
+  };
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const menu = (
+    <AntMenu>
+      <AntMenu.Item key="profile">
+        <Link to="/profile">Profile</Link>
+      </AntMenu.Item>
+      <AntMenu.Item key="settings">
+        <Link to="/settings">Settings</Link>
+      </AntMenu.Item>
+      <AntMenu.Divider />
+      <AntMenu.Item key="logout" onClick={handleLogout}>
+        Logout
+      </AntMenu.Item>
+    </AntMenu>
+  );
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -67,9 +91,17 @@ const Header: React.FC = () => {
             >
               <Search className="h-5 w-5" />
             </button>
-            <Button variant="primary" size="sm">
-              Sign In
-            </Button>
+            {isAuthenticated && user ? (
+              <Dropdown overlay={menu} placement="bottomRight">
+                <Avatar>
+                  {user.firstName ? user.firstName.charAt(0).toUpperCase() : <UserOutlined />}
+                </Avatar>
+              </Dropdown>
+            ) : (
+              <Button type="primary" onClick={() => navigate('/signup')}>
+                Sign In
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -128,16 +160,67 @@ const Header: React.FC = () => {
             </Link>
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="flex items-center px-3">
-                <Button variant="primary" size="sm" fullWidth>
-                  Sign In
-                </Button>
+                {isAuthenticated && user ? (
+                  <div className="flex items-center">
+                    <Avatar>
+                      {user.firstName ? user.firstName.charAt(0).toUpperCase() : <UserOutlined />}
+                    </Avatar>
+                    <div className="ml-3">
+                      <p className="text-base font-medium text-gray-800">
+                        {user.username}
+                      </p>
+                      <p className="text-sm font-medium text-gray-500">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      navigate('/signup');
+                      setIsMenuOpen(false);
+                    }}
+                    style={{ width: '100%' }}
+                  >
+                    Sign In
+                  </Button>
+                )}
               </div>
+              {isAuthenticated && (
+                <div className="mt-3 px-2 space-y-1">
+                  <Link
+                    to="/profile"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Your Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Settings
+                  </Link>
+                  <a
+                    href="#"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                  >
+                    Sign out
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
     </header>
-  )
-}
+  );
+};
 
 export default Header
