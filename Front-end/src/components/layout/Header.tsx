@@ -1,31 +1,37 @@
-import { BookOpen, Menu, Search, X } from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore';
-import { Avatar, Button, Dropdown, Menu as AntMenu } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons'
+import { Menu as AntMenu, Avatar, Button, Dropdown } from 'antd'
+import { BookOpen, Menu, Search, X } from 'lucide-react'
+import React, { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { UserRole } from '../../generated/graphql'
+import { useAuthStore } from '../../store/authStore'
 
 const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { isAuthenticated, user, logout } = useAuthStore()
 
   const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+    return location.pathname === path
+  }
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+    setIsMenuOpen(!isMenuOpen)
+  }
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+    logout()
+    navigate('/login')
+  }
 
   const menu = (
     <AntMenu>
+      {user?.role === UserRole.Admin && (
+        <AntMenu.Item key="admin">
+          <Link to="/admin">Admin Dashboard</Link>
+        </AntMenu.Item>
+      )}
       <AntMenu.Item key="profile">
         <Link to="/profile">Profile</Link>
       </AntMenu.Item>
@@ -37,7 +43,7 @@ const Header: React.FC = () => {
         Logout
       </AntMenu.Item>
     </AntMenu>
-  );
+  )
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -94,7 +100,11 @@ const Header: React.FC = () => {
             {isAuthenticated && user ? (
               <Dropdown overlay={menu} placement="bottomRight">
                 <Avatar>
-                  {user.firstName ? user.firstName.charAt(0).toUpperCase() : <UserOutlined />}
+                  {user.firstName ? (
+                    user.firstName.charAt(0).toUpperCase()
+                  ) : (
+                    <UserOutlined />
+                  )}
                 </Avatar>
               </Dropdown>
             ) : (
@@ -163,7 +173,11 @@ const Header: React.FC = () => {
                 {isAuthenticated && user ? (
                   <div className="flex items-center">
                     <Avatar>
-                      {user.firstName ? user.firstName.charAt(0).toUpperCase() : <UserOutlined />}
+                      {user.firstName ? (
+                        user.firstName.charAt(0).toUpperCase()
+                      ) : (
+                        <UserOutlined />
+                      )}
                     </Avatar>
                     <div className="ml-3">
                       <p className="text-base font-medium text-gray-800">
@@ -178,8 +192,8 @@ const Header: React.FC = () => {
                   <Button
                     type="primary"
                     onClick={() => {
-                      navigate('/signup');
-                      setIsMenuOpen(false);
+                      navigate('/signup')
+                      setIsMenuOpen(false)
                     }}
                     style={{ width: '100%' }}
                   >
@@ -206,8 +220,8 @@ const Header: React.FC = () => {
                   <a
                     href="#"
                     onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
+                      handleLogout()
+                      setIsMenuOpen(false)
                     }}
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                   >
@@ -220,7 +234,7 @@ const Header: React.FC = () => {
         </div>
       )}
     </header>
-  );
-};
+  )
+}
 
 export default Header

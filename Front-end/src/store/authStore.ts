@@ -1,7 +1,6 @@
 import { create } from 'zustand'
-import { MeDocument, MeQuery } from '../generated/graphql'
+import { MeDocument, MeQuery, User } from '../generated/graphql'
 import apolloClient from '../lib/apollo'
-import { User } from '../types'
 
 interface AuthState {
   token: string | null

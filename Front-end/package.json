@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "codegen": "graphql-codegen"
+    "gen": "graphql-codegen"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",

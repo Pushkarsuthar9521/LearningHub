@@ -1,12 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom'
-import HomePage from './pages/HomePage'
+import App from './App'
+import AdminPage from './pages/AdminPage'
 import BlogPage from './pages/BlogPage'
 import BlogPostPage from './pages/BlogPostPage'
-import QuizzesPage from './pages/QuizzesPage'
-import QuizPage from './pages/QuizPage'
+import HomePage from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import QuizPage from './pages/QuizPage'
+import QuizzesPage from './pages/QuizzesPage'
 import { SignUpPage } from './pages/SignUpPage'
-import App from './App'
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
       {
         path: 'quizzes/:slug',
         element: <QuizPage />
+      },
+      {
+        path: 'admin',
+        element: <AdminPage />
       }
     ]
   }

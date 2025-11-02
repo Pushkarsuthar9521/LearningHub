@@ -1,0 +1,38 @@
+mutation CreateQuiz($input: QuizInput!, $questions: [QuestionInput!]!) {
+  createQuiz(input: $input, questions: $questions) {
+    id
+    title
+    slug
+    description
+    category
+    difficulty
+    status
+    timeLimit
+    totalQuestions
+    featuredImage
+    tags
+    createdAt
+    updatedAt
+    author {
+      id
+      username
+      firstName
+      lastName
+    }
+    questions {
+      id
+      questionText
+      explanation
+      orderIndex
+      points
+      imageUrl
+      answers {
+        id
+        answerText
+        isCorrect
+        orderIndex
+        explanation
+      }
+    }
+  }
+}

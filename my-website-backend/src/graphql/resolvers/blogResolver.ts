@@ -24,6 +24,7 @@ export class BlogResolver {
   }
 
   // @Authorized()
+  @Authorized()
   @Mutation(() => Blog)
   async createBlog(
     @Arg('input') input: BlogInput,

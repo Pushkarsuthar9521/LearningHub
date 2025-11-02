@@ -1,111 +1,117 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Clock, Award, User, Book, ArrowLeft, Check, X } from 'lucide-react';
-import Layout from '../components/layout/Layout';
-import Button from '../components/ui/Button';
-import QuizQuestion from '../components/quiz/QuizQuestion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
-import useQuizStore from '../store/quizStore';
-import { Quiz, QuizAttempt } from '../types';
-import { generateUniqueId } from '../lib/utils';
+import { ArrowLeft, Book, Check, Clock, User, X } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import QuizQuestion from '../components/quiz/QuizQuestion'
+import Button from '../components/ui/Button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '../components/ui/Card'
+import useQuizStore from '../store/quizStore'
+import { Quiz, QuizAttempt } from '../types'
 
 const QuizPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const { fetchQuizBySlug, submitQuizAttempt } = useQuizStore();
-  
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [started, setStarted] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<number[]>([]);
-  const [showResult, setShowResult] = useState(false);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
+  const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
+  const { fetchQuizBySlug, submitQuizAttempt } = useQuizStore()
+
+  const [quiz, setQuiz] = useState<Quiz | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [started, setStarted] = useState(false)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [userAnswers, setUserAnswers] = useState<number[]>([])
+  const [showResult, setShowResult] = useState(false)
+  const [quizCompleted, setQuizCompleted] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const [score, setScore] = useState(0)
 
   useEffect(() => {
     const loadQuiz = async () => {
       if (slug) {
-        setLoading(true);
-        const fetchedQuiz = await fetchQuizBySlug(slug);
+        setLoading(true)
+        const fetchedQuiz = await fetchQuizBySlug(slug)
         if (fetchedQuiz) {
-          setQuiz(fetchedQuiz);
-          document.title = `Quiz: ${fetchedQuiz.title}`;
-          
+          setQuiz(fetchedQuiz)
+          document.title = `Quiz: ${fetchedQuiz.title}`
+
           // Initialize answers array
-          setUserAnswers(new Array(fetchedQuiz.questions.length).fill(-1));
-          
+          setUserAnswers(new Array(fetchedQuiz.questions.length).fill(-1))
+
           // Set time if there's a time limit
           if (fetchedQuiz.timeLimit) {
-            setTimeLeft(fetchedQuiz.timeLimit * 60); // convert to seconds
+            setTimeLeft(fetchedQuiz.timeLimit * 60) // convert to seconds
           }
         }
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadQuiz();
-  }, [slug, fetchQuizBySlug]);
+    loadQuiz()
+  }, [slug, fetchQuizBySlug])
 
   // Timer effect
   useEffect(() => {
-    if (!started || timeLeft === null || quizCompleted) return;
+    if (!started || timeLeft === null || quizCompleted) return
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           // Time's up
-          clearInterval(timer);
-          finishQuiz();
-          return 0;
+          clearInterval(timer)
+          finishQuiz()
+          return 0
         }
-        return prev - 1;
-      });
-    }, 1000);
+        return prev - 1
+      })
+    }, 1000)
 
-    return () => clearInterval(timer);
-  }, [started, timeLeft, quizCompleted]);
+    return () => clearInterval(timer)
+  }, [started, timeLeft, quizCompleted])
 
   const startQuiz = () => {
-    setStarted(true);
-    setCurrentQuestionIndex(0);
-    setUserAnswers(new Array(quiz?.questions.length || 0).fill(-1));
-    setQuizCompleted(false);
-    setShowResult(false);
-    setScore(0);
-  };
+    setStarted(true)
+    setCurrentQuestionIndex(0)
+    setUserAnswers(new Array(quiz?.questions.length || 0).fill(-1))
+    setQuizCompleted(false)
+    setShowResult(false)
+    setScore(0)
+  }
 
   const handleAnswer = (selectedOption: number) => {
-    const newAnswers = [...userAnswers];
-    newAnswers[currentQuestionIndex] = selectedOption;
-    setUserAnswers(newAnswers);
-    setShowResult(true);
-  };
+    const newAnswers = [...userAnswers]
+    newAnswers[currentQuestionIndex] = selectedOption
+    setUserAnswers(newAnswers)
+    setShowResult(true)
+  }
 
   const nextQuestion = () => {
     if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setShowResult(false);
+      setCurrentQuestionIndex(prev => prev + 1)
+      setShowResult(false)
     } else {
-      finishQuiz();
+      finishQuiz()
     }
-  };
+  }
 
   const finishQuiz = () => {
-    if (!quiz) return;
-    
+    if (!quiz) return
+
     // Calculate score
-    let correctAnswers = 0;
+    let correctAnswers = 0
     quiz.questions.forEach((question, index) => {
       if (userAnswers[index] === question.correctAnswer) {
-        correctAnswers++;
+        correctAnswers++
       }
-    });
-    
-    const finalScore = Math.round((correctAnswers / quiz.questions.length) * 100);
-    setScore(finalScore);
-    
+    })
+
+    const finalScore = Math.round(
+      (correctAnswers / quiz.questions.length) * 100
+    )
+    setScore(finalScore)
+
     // Submit quiz attempt
     const attempt: Omit<QuizAttempt, 'id' | 'completedAt'> = {
       quizId: quiz.id,
@@ -113,21 +119,21 @@ const QuizPage: React.FC = () => {
       answers: userAnswers,
       score: finalScore,
       timeSpent: quiz.timeLimit ? quiz.timeLimit * 60 - (timeLeft || 0) : 0
-    };
-    
-    submitQuizAttempt(attempt);
-    setQuizCompleted(true);
-  };
+    }
+
+    submitQuizAttempt(attempt)
+    setQuizCompleted(true)
+  }
 
   const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+  }
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto">
             <div className="animate-pulse">
@@ -137,18 +143,22 @@ const QuizPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </Layout>
-    );
+      </>
+    )
   }
 
   if (!quiz) {
     return (
-      <Layout>
+      <>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Quiz Not Found</h1>
-            <p className="text-gray-600 mb-8">The quiz you're looking for doesn't exist or has been removed.</p>
-            <Link 
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Quiz Not Found
+            </h1>
+            <p className="text-gray-600 mb-8">
+              The quiz you're looking for doesn't exist or has been removed.
+            </p>
+            <Link
               to="/quizzes"
               className="inline-flex items-center text-purple-600 hover:text-purple-800"
             >
@@ -157,27 +167,29 @@ const QuizPage: React.FC = () => {
             </Link>
           </div>
         </div>
-      </Layout>
-    );
+      </>
+    )
   }
 
   return (
-    <Layout>
+    <>
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           {!started ? (
             <Card>
               <div className="md:flex">
                 <div className="md:w-2/5 h-48 md:h-auto relative">
-                  <img 
-                    src={quiz.coverImage} 
-                    alt={quiz.title} 
+                  <img
+                    src={quiz.coverImage}
+                    alt={quiz.title}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
                 <div className="md:w-3/5 p-6">
                   <CardHeader className="p-0 border-none mb-4">
-                    <CardTitle className="text-2xl font-bold">{quiz.title}</CardTitle>
+                    <CardTitle className="text-2xl font-bold">
+                      {quiz.title}
+                    </CardTitle>
                     <CardDescription>{quiz.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -198,8 +210,8 @@ const QuizPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {quiz.categories.map((category) => (
-                        <span 
+                      {quiz.categories.map(category => (
+                        <span
                           key={category.id}
                           className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full"
                         >
@@ -207,8 +219,8 @@ const QuizPage: React.FC = () => {
                         </span>
                       ))}
                     </div>
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       onClick={startQuiz}
                       className="w-full sm:w-auto"
                     >
@@ -241,7 +253,9 @@ const QuizPage: React.FC = () => {
                         r="40"
                         fill="transparent"
                         strokeDasharray={`${2 * Math.PI * 40}`}
-                        strokeDashoffset={`${2 * Math.PI * 40 * (1 - score / 100)}`}
+                        strokeDashoffset={`${
+                          2 * Math.PI * 40 * (1 - score / 100)
+                        }`}
                         transform="rotate(-90 50 50)"
                       ></circle>
                       <text
@@ -257,13 +271,24 @@ const QuizPage: React.FC = () => {
                       </text>
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Quiz Completed!</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Quiz Completed!
+                  </h2>
                   <p className="text-gray-600 mb-6">
-                    You scored {score}% ({userAnswers.filter((answer, index) => answer === quiz.questions[index].correctAnswer).length} out of {quiz.questions.length} correct)
+                    You scored {score}% (
+                    {
+                      userAnswers.filter(
+                        (answer, index) =>
+                          answer === quiz.questions[index].correctAnswer
+                      ).length
+                    }{' '}
+                    out of {quiz.questions.length} correct)
                   </p>
-                  
+
                   <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Answers</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Your Answers
+                    </h3>
                     <div className="space-y-3 max-w-md mx-auto">
                       {quiz.questions.map((question, index) => (
                         <div key={index} className="flex items-start text-left">
@@ -275,13 +300,19 @@ const QuizPage: React.FC = () => {
                             )}
                           </div>
                           <div className="ml-3">
-                            <p className="text-sm text-gray-800">{question.question}</p>
+                            <p className="text-sm text-gray-800">
+                              {question.question}
+                            </p>
                             <p className="text-xs text-gray-600">
-                              Your answer: {userAnswers[index] >= 0 ? question.options[userAnswers[index]] : 'Not answered'}
+                              Your answer:{' '}
+                              {userAnswers[index] >= 0
+                                ? question.options[userAnswers[index]]
+                                : 'Not answered'}
                             </p>
                             {userAnswers[index] !== question.correctAnswer && (
                               <p className="text-xs text-green-600">
-                                Correct answer: {question.options[question.correctAnswer]}
+                                Correct answer:{' '}
+                                {question.options[question.correctAnswer]}
                               </p>
                             )}
                           </div>
@@ -289,18 +320,15 @@ const QuizPage: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => navigate('/quizzes')}
                     >
                       Browse More Quizzes
                     </Button>
-                    <Button 
-                      variant="secondary" 
-                      onClick={startQuiz}
-                    >
+                    <Button variant="secondary" onClick={startQuiz}>
                       Try Again
                     </Button>
                   </div>
@@ -313,22 +341,32 @@ const QuizPage: React.FC = () => {
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-700">
-                    Question {currentQuestionIndex + 1} of {quiz.questions.length}
+                    Question {currentQuestionIndex + 1} of{' '}
+                    {quiz.questions.length}
                   </span>
                   {timeLeft !== null && (
-                    <span className={`text-sm font-medium ${timeLeft < 30 ? 'text-red-600' : 'text-gray-700'}`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        timeLeft < 30 ? 'text-red-600' : 'text-gray-700'
+                      }`}
+                    >
                       Time remaining: {formatTime(timeLeft)}
                     </span>
                   )}
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
+                  <div
                     className="bg-purple-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
+                    style={{
+                      width: `${
+                        ((currentQuestionIndex + 1) / quiz.questions.length) *
+                        100
+                      }%`
+                    }}
                   ></div>
                 </div>
               </div>
-              
+
               {/* Current Question */}
               <QuizQuestion
                 question={quiz.questions[currentQuestionIndex]}
@@ -343,8 +381,8 @@ const QuizPage: React.FC = () => {
           )}
         </div>
       </div>
-    </Layout>
-  );
-};
+    </>
+  )
+}
 
-export default QuizPage;
+export default QuizPage

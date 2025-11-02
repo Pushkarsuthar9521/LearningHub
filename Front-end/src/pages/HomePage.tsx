@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom'
 import BlogCard from '../components/blog/BlogCard'
 import QuizCard from '../components/quiz/QuizCard'
 import Button from '../components/ui/Button'
+import { useAuthStore } from '../store/authStore'
 import useBlogStore from '../store/blogStore'
 import useQuizStore from '../store/quizStore'
 
 const HomePage: FC = () => {
   const { posts, fetchPosts } = useBlogStore()
   const { quizzes, fetchQuizzes } = useQuizStore()
+  const { isAuthenticated } = useAuthStore()
 
   useEffect(() => {
     fetchPosts()
@@ -194,25 +196,27 @@ const HomePage: FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6">
-              Ready to Start Learning?
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Join our community of learners and expand your knowledge today!
-            </p>
-            <Button
-              size="lg"
-              variant="primary"
-              className="bg-white text-blue-600 hover:bg-gray-100"
-            >
-              Sign Up for Free
-            </Button>
+      {!isAuthenticated && (
+        <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-6">
+                Ready to Start Learning?
+              </h2>
+              <p className="text-xl mb-8 opacity-90">
+                Join our community of learners and expand your knowledge today!
+              </p>
+              <Button
+                size="lg"
+                variant="primary"
+                className="bg-white text-blue-600 hover:bg-gray-100"
+              >
+                Sign Up for Free
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   )
 }

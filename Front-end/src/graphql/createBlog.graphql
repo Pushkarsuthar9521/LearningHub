@@ -1,0 +1,21 @@
+mutation CreateBlog($input: BlogInput!) {
+  createBlog(input: $input) {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    createdAt
+    updatedAt
+    author {
+      id
+      username
+      firstName
+      lastName
+    }
+  }
+}

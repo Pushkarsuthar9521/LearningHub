@@ -1,12 +1,16 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { Arg, Authorized, Ctx, ID, Mutation, Query, Resolver } from 'type-graphql'
-import { User } from '../../entities/User'
 import {
-  AuthResponse,
-  LoginInput,
-  RegisterInput
-} from '../../types/AuthInput'
+  Arg,
+  Authorized,
+  Ctx,
+  ID,
+  Mutation,
+  Query,
+  Resolver
+} from 'type-graphql'
+import { User } from '../../entities/User'
+import { AuthResponse, LoginInput, RegisterInput } from '../../types/AuthInput'
 import { MyContext } from '../../types/MyContext'
 import { UserInput } from '../../types/UserInput'
 import { env } from '../../utils/env'
@@ -15,8 +19,7 @@ import { env } from '../../utils/env'
 export class UserResolver {
   @Mutation(() => AuthResponse)
   async login(
-    @Arg('input') { email, password }: LoginInput,
-    @Ctx() { res }: MyContext
+    @Arg('input') { email, password }: LoginInput
   ): Promise<AuthResponse> {
     const user = await User.findOne({ where: { email } })
     if (!user) {
@@ -28,9 +31,13 @@ export class UserResolver {
       throw new Error('Invalid credentials')
     }
 
-    const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
-      expiresIn: '1d'
-    })
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      env.JWT_SECRET,
+      {
+        expiresIn: '1d'
+      }
+    )
 
     return { token, user }
   }
@@ -66,9 +73,13 @@ export class UserResolver {
     const user = User.create({ ...input, password: hashedPassword })
     await user.save()
 
-    const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
-      expiresIn: '1d'
-    })
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      env.JWT_SECRET,
+      {
+        expiresIn: '1d'
+      }
+    )
 
     return { token, user }
   }

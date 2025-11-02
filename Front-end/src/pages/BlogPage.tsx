@@ -1,71 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Filter } from 'lucide-react';
-import Layout from '../components/layout/Layout';
-import BlogCard from '../components/blog/BlogCard';
-import Input from '../components/ui/Input';
-import { Card, CardContent } from '../components/ui/Card';
-import useBlogStore from '../store/blogStore';
-import { BlogPost, Category, Tag } from '../types';
+import { Filter, Search } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import BlogCard from '../components/blog/BlogCard'
+import { Card, CardContent } from '../components/ui/Card'
+import Input from '../components/ui/Input'
+import useBlogStore from '../store/blogStore'
+import { BlogPost } from '../types'
 
 const BlogPage: React.FC = () => {
-  const { posts, categories, tags, fetchPosts, fetchCategories, fetchTags } = useBlogStore();
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const { posts, categories, tags, fetchPosts, fetchCategories, fetchTags } =
+    useBlogStore()
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchPosts();
-    fetchCategories();
-    fetchTags();
-  }, [fetchPosts, fetchCategories, fetchTags]);
+    fetchPosts()
+    fetchCategories()
+    fetchTags()
+  }, [fetchPosts, fetchCategories, fetchTags])
 
   useEffect(() => {
-    let result = [...posts];
-    
+    let result = [...posts]
+
     // Apply search filter
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(post => 
-        post.title.toLowerCase().includes(query) || 
-        post.excerpt.toLowerCase().includes(query)
-      );
+      const query = searchQuery.toLowerCase()
+      result = result.filter(
+        post =>
+          post.title.toLowerCase().includes(query) ||
+          post.excerpt.toLowerCase().includes(query)
+      )
     }
-    
+
     // Apply category filter
     if (selectedCategory) {
-      result = result.filter(post => 
+      result = result.filter(post =>
         post.categories.some(category => category.id === selectedCategory)
-      );
+      )
     }
-    
+
     // Apply tag filter
     if (selectedTag) {
-      result = result.filter(post => 
+      result = result.filter(post =>
         post.tags.some(tag => tag.id === selectedTag)
-      );
+      )
     }
-    
-    setFilteredPosts(result);
-  }, [posts, searchQuery, selectedCategory, selectedTag]);
+
+    setFilteredPosts(result)
+  }, [posts, searchQuery, selectedCategory, selectedTag])
 
   const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
-  };
+    setSelectedCategory(selectedCategory === categoryId ? null : categoryId)
+  }
 
   const handleTagChange = (tagId: string) => {
-    setSelectedTag(selectedTag === tagId ? null : tagId);
-  };
+    setSelectedTag(selectedTag === tagId ? null : tagId)
+  }
 
   const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory(null);
-    setSelectedTag(null);
-  };
+    setSearchQuery('')
+    setSelectedCategory(null)
+    setSelectedTag(null)
+  }
 
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,21 +87,25 @@ const BlogPage: React.FC = () => {
               <Input
                 placeholder="Search articles..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 leftIcon={<Search className="h-5 w-5 text-gray-400" />}
                 fullWidth
               />
             </div>
             <div className="w-full md:w-1/2 flex gap-2">
-              <button 
+              <button
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={() => document.getElementById('filters-modal')?.classList.toggle('hidden')}
+                onClick={() =>
+                  document
+                    .getElementById('filters-modal')
+                    ?.classList.toggle('hidden')
+                }
               >
                 <Filter className="h-4 w-4 mr-2" />
                 Filters
               </button>
               {(selectedCategory || selectedTag || searchQuery) && (
-                <button 
+                <button
                   className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   onClick={clearFilters}
                 >
@@ -111,20 +116,27 @@ const BlogPage: React.FC = () => {
           </div>
 
           {/* Filters Modal */}
-          <div id="filters-modal" className="mt-4 bg-white border border-gray-200 rounded-lg p-4 shadow-lg hidden">
+          <div
+            id="filters-modal"
+            className="mt-4 bg-white border border-gray-200 rounded-lg p-4 shadow-lg hidden"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Categories</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">
+                  Categories
+                </h3>
                 <div className="space-y-2">
                   {categories.map(category => (
                     <label key={category.id} className="flex items-center">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         checked={selectedCategory === category.id}
                         onChange={() => handleCategoryChange(category.id)}
                       />
-                      <span className="ml-2 text-gray-700">{category.name}</span>
+                      <span className="ml-2 text-gray-700">
+                        {category.name}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -156,7 +168,9 @@ const BlogPage: React.FC = () => {
       {filteredPosts.length > 0 && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Featured Post</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+              Featured Post
+            </h2>
             <BlogCard post={filteredPosts[0]} variant="featured" />
           </div>
         </section>
@@ -166,18 +180,22 @@ const BlogPage: React.FC = () => {
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            {searchQuery || selectedCategory || selectedTag 
-              ? 'Search Results' 
+            {searchQuery || selectedCategory || selectedTag
+              ? 'Search Results'
               : 'Latest Articles'}
           </h2>
-          
+
           {filteredPosts.length === 0 ? (
             <Card>
               <CardContent className="py-12">
                 <div className="text-center">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
-                  <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-                  <button 
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No articles found
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Try adjusting your search or filter criteria
+                  </p>
+                  <button
                     onClick={clearFilters}
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
@@ -188,9 +206,11 @@ const BlogPage: React.FC = () => {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.slice(searchQuery || selectedCategory || selectedTag ? 0 : 1).map(post => (
-                <BlogCard key={post.id} post={post} />
-              ))}
+              {filteredPosts
+                .slice(searchQuery || selectedCategory || selectedTag ? 0 : 1)
+                .map(post => (
+                  <BlogCard key={post.id} post={post} />
+                ))}
             </div>
           )}
         </div>
@@ -199,10 +219,12 @@ const BlogPage: React.FC = () => {
       {/* Categories Section */}
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Browse by Category</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            Browse by Category
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map(category => (
-              <Link 
+              <Link
                 key={category.id}
                 to={`/blog/category/${category.slug}`}
                 className="group block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -220,8 +242,8 @@ const BlogPage: React.FC = () => {
           </div>
         </div>
       </section>
-    </Layout>
-  );
-};
+    </>
+  )
+}
 
-export default BlogPage;
+export default BlogPage

@@ -31,6 +31,13 @@ export type Answer = {
   updatedAt: Scalars['DateTimeISO']['output'];
 };
 
+export type AnswerInput = {
+  answerText: Scalars['String']['input'];
+  explanation?: InputMaybe<Scalars['String']['input']>;
+  isCorrect: Scalars['Boolean']['input'];
+  orderIndex?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type AuthResponse = {
   __typename?: 'AuthResponse';
   token: Scalars['String']['output'];
@@ -82,11 +89,14 @@ export type LoginInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createBlog: Blog;
+  createQuiz: Quiz;
   deleteBlog: Scalars['Boolean']['output'];
+  deleteQuiz: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   login: AuthResponse;
   register: AuthResponse;
   updateBlog?: Maybe<Blog>;
+  updateQuiz?: Maybe<Quiz>;
   updateUser?: Maybe<User>;
 };
 
@@ -96,7 +106,18 @@ export type MutationCreateBlogArgs = {
 };
 
 
+export type MutationCreateQuizArgs = {
+  input: QuizInput;
+  questions: Array<QuestionInput>;
+};
+
+
 export type MutationDeleteBlogArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteQuizArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -122,6 +143,12 @@ export type MutationUpdateBlogArgs = {
 };
 
 
+export type MutationUpdateQuizArgs = {
+  id: Scalars['ID']['input'];
+  input: QuizInput;
+};
+
+
 export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UserInput;
@@ -131,6 +158,8 @@ export type Query = {
   __typename?: 'Query';
   getBlog?: Maybe<Blog>;
   getBlogs: Array<Blog>;
+  getQuiz?: Maybe<Quiz>;
+  getQuizzes: Array<Quiz>;
   getUser?: Maybe<User>;
   getUsers: Array<User>;
   hello: Scalars['String']['output'];
@@ -140,6 +169,11 @@ export type Query = {
 
 
 export type QueryGetBlogArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetQuizArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -160,6 +194,15 @@ export type Question = {
   questionText: Scalars['String']['output'];
   quiz: Quiz;
   updatedAt: Scalars['DateTimeISO']['output'];
+};
+
+export type QuestionInput = {
+  answers: Array<AnswerInput>;
+  explanation?: InputMaybe<Scalars['String']['input']>;
+  imageUrl?: InputMaybe<Scalars['String']['input']>;
+  orderIndex?: InputMaybe<Scalars['Int']['input']>;
+  points?: InputMaybe<Scalars['Int']['input']>;
+  questionText: Scalars['String']['input'];
 };
 
 export type Quiz = {
@@ -207,6 +250,17 @@ export enum QuizDifficulty {
   Medium = 'MEDIUM'
 }
 
+export type QuizInput = {
+  category: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<QuizDifficulty>;
+  featuredImage?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<QuizStatus>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  timeLimit?: InputMaybe<Scalars['Int']['input']>;
+  title: Scalars['String']['input'];
+};
+
 /** Quiz status enum */
 export enum QuizStatus {
   Archived = 'ARCHIVED',
@@ -253,6 +307,21 @@ export enum UserRole {
   User = 'USER'
 }
 
+export type CreateBlogMutationVariables = Exact<{
+  input: BlogInput;
+}>;
+
+
+export type CreateBlogMutation = { __typename?: 'Mutation', createBlog: { __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, featuredImage?: string | null, tags: Array<string>, category: string, status: BlogStatus, createdAt: string, updatedAt: string, author?: { __typename?: 'User', id: string, username: string, firstName: string, lastName: string } | null } };
+
+export type CreateQuizMutationVariables = Exact<{
+  input: QuizInput;
+  questions: Array<QuestionInput> | QuestionInput;
+}>;
+
+
+export type CreateQuizMutation = { __typename?: 'Mutation', createQuiz: { __typename?: 'Quiz', id: string, title: string, slug: string, description?: string | null, category: string, difficulty: QuizDifficulty, status: QuizStatus, timeLimit?: number | null, totalQuestions: number, featuredImage?: string | null, tags: Array<string>, createdAt: string, updatedAt: string, author: { __typename?: 'User', id: string, username: string, firstName: string, lastName: string }, questions: Array<{ __typename?: 'Question', id: string, questionText: string, explanation?: string | null, orderIndex: number, points: number, imageUrl?: string | null, answers: Array<{ __typename?: 'Answer', id: string, answerText: string, isCorrect: boolean, orderIndex: number, explanation?: string | null }> }> } };
+
 export type LoginMutationVariables = Exact<{
   input: LoginInput;
 }>;
@@ -263,7 +332,7 @@ export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'Au
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, email: string, username: string, firstName: string, lastName: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, email: string, username: string, firstName: string, lastName: string, role: UserRole } | null };
 
 export type RegisterMutationVariables = Exact<{
   input: RegisterInput;
@@ -273,6 +342,122 @@ export type RegisterMutationVariables = Exact<{
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'AuthResponse', token: string, user: { __typename?: 'User', id: string, email: string, username: string } } };
 
 
+export const CreateBlogDocument = gql`
+    mutation CreateBlog($input: BlogInput!) {
+  createBlog(input: $input) {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    createdAt
+    updatedAt
+    author {
+      id
+      username
+      firstName
+      lastName
+    }
+  }
+}
+    `;
+export type CreateBlogMutationFn = Apollo.MutationFunction<CreateBlogMutation, CreateBlogMutationVariables>;
+
+/**
+ * __useCreateBlogMutation__
+ *
+ * To run a mutation, you first call `useCreateBlogMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBlogMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBlogMutation, { data, loading, error }] = useCreateBlogMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateBlogMutation(baseOptions?: Apollo.MutationHookOptions<CreateBlogMutation, CreateBlogMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBlogMutation, CreateBlogMutationVariables>(CreateBlogDocument, options);
+      }
+export type CreateBlogMutationHookResult = ReturnType<typeof useCreateBlogMutation>;
+export type CreateBlogMutationResult = Apollo.MutationResult<CreateBlogMutation>;
+export type CreateBlogMutationOptions = Apollo.BaseMutationOptions<CreateBlogMutation, CreateBlogMutationVariables>;
+export const CreateQuizDocument = gql`
+    mutation CreateQuiz($input: QuizInput!, $questions: [QuestionInput!]!) {
+  createQuiz(input: $input, questions: $questions) {
+    id
+    title
+    slug
+    description
+    category
+    difficulty
+    status
+    timeLimit
+    totalQuestions
+    featuredImage
+    tags
+    createdAt
+    updatedAt
+    author {
+      id
+      username
+      firstName
+      lastName
+    }
+    questions {
+      id
+      questionText
+      explanation
+      orderIndex
+      points
+      imageUrl
+      answers {
+        id
+        answerText
+        isCorrect
+        orderIndex
+        explanation
+      }
+    }
+  }
+}
+    `;
+export type CreateQuizMutationFn = Apollo.MutationFunction<CreateQuizMutation, CreateQuizMutationVariables>;
+
+/**
+ * __useCreateQuizMutation__
+ *
+ * To run a mutation, you first call `useCreateQuizMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateQuizMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createQuizMutation, { data, loading, error }] = useCreateQuizMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      questions: // value for 'questions'
+ *   },
+ * });
+ */
+export function useCreateQuizMutation(baseOptions?: Apollo.MutationHookOptions<CreateQuizMutation, CreateQuizMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateQuizMutation, CreateQuizMutationVariables>(CreateQuizDocument, options);
+      }
+export type CreateQuizMutationHookResult = ReturnType<typeof useCreateQuizMutation>;
+export type CreateQuizMutationResult = Apollo.MutationResult<CreateQuizMutation>;
+export type CreateQuizMutationOptions = Apollo.BaseMutationOptions<CreateQuizMutation, CreateQuizMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($input: LoginInput!) {
   login(input: $input) {
@@ -321,6 +506,7 @@ export const MeDocument = gql`
     username
     firstName
     lastName
+    role
   }
 }
     `;
