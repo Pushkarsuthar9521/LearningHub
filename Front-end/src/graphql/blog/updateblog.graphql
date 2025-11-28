@@ -1,0 +1,30 @@
+mutation UpdateBlog($id: ID!, $input: BlogInput!) {
+  updateBlog(id: $id, input: $input) {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    viewCount
+    likeCount
+    publishedAt
+    createdAt
+    updatedAt
+    authorId
+    author {
+      id
+      email
+      username
+      firstName
+      lastName
+      role
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+}

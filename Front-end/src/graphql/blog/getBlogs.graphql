@@ -1,0 +1,30 @@
+query GetBlogs {
+  getBlogs {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    viewCount
+    likeCount
+    publishedAt
+    createdAt
+    updatedAt
+    authorId
+    author {
+      id
+      email
+      username
+      firstName
+      lastName
+      role
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+}

@@ -4,53 +4,67 @@ import ReactMarkdown from 'react-markdown'
 import { Link, useParams } from 'react-router-dom'
 import remarkGfm from 'remark-gfm'
 import BlogCard from '../components/blog/BlogCard'
+import {
+  Blog,
+  useGetBlogBySlugLazyQuery,
+  useGetBlogsLazyQuery
+} from '../generated/graphql'
 import { formatDate } from '../lib/utils'
-import useBlogStore from '../store/blogStore'
-import { BlogPost } from '../types'
 
 const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
-  const { posts, fetchPostBySlug, fetchPosts } = useBlogStore()
-  const [post, setPost] = useState<BlogPost | null>(null)
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
+  const [post, setPost] = useState<Blog | null>(null)
+  const [relatedPosts, setRelatedPosts] = useState<Blog[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [getBlogBySlug] = useGetBlogBySlugLazyQuery()
+  const [getBlogs] = useGetBlogsLazyQuery()
 
   useEffect(() => {
     const loadPost = async () => {
       if (slug) {
         setLoading(true)
-        const fetchedPost = await fetchPostBySlug(slug)
-        if (fetchedPost) {
-          setPost(fetchedPost)
-          document.title = fetchedPost.title
-
-          // Ensure all posts are loaded for related posts
-          await fetchPosts()
-        }
-        setLoading(false)
+        await getBlogBySlug({
+          variables: { slug },
+          onCompleted: data => {
+            if (data.getBlogBySlug) {
+              setPost((data?.getBlogBySlug as Blog) || null)
+              document.title = data.getBlogBySlug.title
+            }
+            setLoading(false)
+          }
+        })
       }
     }
 
     loadPost()
-  }, [slug, fetchPostBySlug, fetchPosts])
+  }, [slug, getBlogBySlug])
 
   useEffect(() => {
-    if (post && posts.length > 0) {
-      // Find related posts based on categories and tags
-      const related = posts
-        .filter(
-          p =>
-            p.id !== post.id &&
-            (p.categories.some(c =>
-              post.categories.some(pc => pc.id === c.id)
-            ) ||
-              p.tags.some(t => post.tags.some(pt => pt.id === t.id)))
-        )
-        .slice(0, 3)
+    const loadRelatedPosts = async () => {
+      if (post) {
+        await getBlogs({
+          onCompleted: data => {
+            if (data.getBlogs) {
+              // Find related posts based on category and tags
+              const related = (data.getBlogs as Blog[])
+                .filter(
+                  p =>
+                    p.id !== post.id &&
+                    (p.category === post.category ||
+                      p.tags.some(t => post.tags.includes(t)))
+                )
+                .slice(0, 3)
 
-      setRelatedPosts(related)
+              setRelatedPosts(related)
+            }
+          }
+        })
+      }
     }
-  }, [post, posts])
+
+    loadRelatedPosts()
+  }, [post, getBlogs])
 
   if (loading) {
     return (
@@ -106,7 +120,7 @@ const BlogPostPage: React.FC = () => {
         <div className="relative">
           <div className="w-full h-64 sm:h-80 md:h-96 bg-gray-900">
             <img
-              src={post.coverImage}
+              src={post.featuredImage || 'https://via.placeholder.com/1200x600'}
               alt={post.title}
               className="w-full h-full object-cover opacity-70"
             />
@@ -125,12 +139,13 @@ const BlogPostPage: React.FC = () => {
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center mb-8 text-gray-600">
               <div className="flex items-center">
-                <img
-                  src={post.author.avatar}
-                  alt={post.author.name}
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <span>{post.author.name}</span>
+                <div className="w-10 h-10 rounded-full mr-3 bg-blue-500 flex items-center justify-center text-white font-semibold">
+                  {post.author?.firstName?.[0]}
+                  {post.author?.lastName?.[0]}
+                </div>
+                <span>
+                  {post.author?.firstName} {post.author?.lastName}
+                </span>
               </div>
               <span className="mx-3">•</span>
               <div className="flex items-center">
@@ -147,15 +162,14 @@ const BlogPostPage: React.FC = () => {
 
             <div className="border-t border-gray-200 pt-6">
               <div className="flex flex-wrap gap-2">
-                {post.tags.map(tag => (
-                  <Link
-                    key={tag.id}
-                    to={`/blog/tag/${tag.slug}`}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
+                {post.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
                   >
                     <Tag className="h-3 w-3 mr-1" />
-                    {tag.name}
-                  </Link>
+                    {tag}
+                  </span>
                 ))}
               </div>
             </div>

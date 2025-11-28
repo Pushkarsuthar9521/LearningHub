@@ -1,0 +1,72 @@
+services:
+  backend:
+    build:
+      context: ./my-website-backend
+      dockerfile: Dockerfile
+    container_name: learninghub-backend
+    restart: unless-stopped
+    environment:
+      # Inside Docker the DB host must be the compose service name "db"
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/learning-hub
+      # PORT used by your backend process inside the container (default 4000 to match ports below)
+      PORT: ${BACKEND_PORT:-4000}
+      NODE_ENV: ${NODE_ENV:-production}
+      JWT_SECRET: ${JWT_SECRET:-eb66f2de426ab16a90718d9d2ffa529d8bbb4c5b8b139651af8fe0bd15762176}
+    depends_on:
+      - db
+    ports:
+      - '4000:4000'
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./Front-end
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:4000/graphql}
+    container_name: learninghub-frontend
+    restart: unless-stopped
+    ports:
+      - '3000:80'
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    container_name: learninghub-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-password}
+    ports:
+      - '5050:80'
+    networks:
+      - app-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
+  pgadmin_data:
+
+networks:
+  app-network:
+    driver: bridge

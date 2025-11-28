@@ -1,25 +1,28 @@
 import { Filter, Search } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useMemo, useState } from 'react'
 import BlogCard from '../components/blog/BlogCard'
 import { Card, CardContent } from '../components/ui/Card'
 import Input from '../components/ui/Input'
-import useBlogStore from '../store/blogStore'
-import { BlogPost } from '../types'
+import { Blog, useGetBlogsQuery } from '../generated/graphql'
 
 const BlogPage: React.FC = () => {
-  const { posts, categories, tags, fetchPosts, fetchCategories, fetchTags } =
-    useBlogStore()
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([])
+  const { data, loading } = useGetBlogsQuery()
+  const [filteredPosts, setFilteredPosts] = useState<Blog[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchPosts()
-    fetchCategories()
-    fetchTags()
-  }, [fetchPosts, fetchCategories, fetchTags])
+  const posts = useMemo(() => data?.getBlogs || [], [data])
+
+  // Extract unique categories and tags from posts
+  const categories = useMemo(
+    () => Array.from(new Set(posts.map(p => p.category))),
+    [posts]
+  )
+  const tags = useMemo(
+    () => Array.from(new Set(posts.flatMap(p => p.tags))),
+    [posts]
+  )
 
   useEffect(() => {
     let result = [...posts]
@@ -30,39 +33,46 @@ const BlogPage: React.FC = () => {
       result = result.filter(
         post =>
           post.title.toLowerCase().includes(query) ||
-          post.excerpt.toLowerCase().includes(query)
+          (post.excerpt?.toLowerCase().includes(query) ?? false)
       )
     }
 
     // Apply category filter
     if (selectedCategory) {
-      result = result.filter(post =>
-        post.categories.some(category => category.id === selectedCategory)
-      )
+      result = result.filter(post => post.category === selectedCategory)
     }
 
     // Apply tag filter
     if (selectedTag) {
-      result = result.filter(post =>
-        post.tags.some(tag => tag.id === selectedTag)
-      )
+      result = result.filter(post => post.tags.includes(selectedTag))
     }
 
-    setFilteredPosts(result)
+    setFilteredPosts(result as Blog[])
   }, [posts, searchQuery, selectedCategory, selectedTag])
 
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(selectedCategory === categoryId ? null : categoryId)
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(selectedCategory === category ? null : category)
   }
 
-  const handleTagChange = (tagId: string) => {
-    setSelectedTag(selectedTag === tagId ? null : tagId)
+  const handleTagChange = (tag: string) => {
+    setSelectedTag(selectedTag === tag ? null : tag)
   }
 
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedCategory(null)
     setSelectedTag(null)
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading posts...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -127,16 +137,14 @@ const BlogPage: React.FC = () => {
                 </h3>
                 <div className="space-y-2">
                   {categories.map(category => (
-                    <label key={category.id} className="flex items-center">
+                    <label key={category} className="flex items-center">
                       <input
                         type="checkbox"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        checked={selectedCategory === category.id}
-                        onChange={() => handleCategoryChange(category.id)}
+                        checked={selectedCategory === category}
+                        onChange={() => handleCategoryChange(category)}
                       />
-                      <span className="ml-2 text-gray-700">
-                        {category.name}
-                      </span>
+                      <span className="ml-2 text-gray-700">{category}</span>
                     </label>
                   ))}
                 </div>
@@ -146,15 +154,15 @@ const BlogPage: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   {tags.map(tag => (
                     <button
-                      key={tag.id}
+                      key={tag}
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedTag === tag.id
+                        selectedTag === tag
                           ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
                           : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200'
                       }`}
-                      onClick={() => handleTagChange(tag.id)}
+                      onClick={() => handleTagChange(tag)}
                     >
-                      {tag.name}
+                      {tag}
                     </button>
                   ))}
                 </div>
@@ -224,20 +232,17 @@ const BlogPage: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map(category => (
-              <Link
-                key={category.id}
-                to={`/blog/category/${category.slug}`}
-                className="group block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+              <div
+                key={category}
+                className="group block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleCategoryChange(category)}
               >
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {category.name}
+                    {category}
                   </h3>
-                  {category.description && (
-                    <p className="mt-2 text-gray-600">{category.description}</p>
-                  )}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

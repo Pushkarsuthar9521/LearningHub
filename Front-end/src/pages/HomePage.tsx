@@ -4,19 +4,20 @@ import { Link } from 'react-router-dom'
 import BlogCard from '../components/blog/BlogCard'
 import QuizCard from '../components/quiz/QuizCard'
 import Button from '../components/ui/Button'
+import { Blog, useGetBlogsQuery } from '../generated/graphql'
 import { useAuthStore } from '../store/authStore'
-import useBlogStore from '../store/blogStore'
 import useQuizStore from '../store/quizStore'
 
 const HomePage: FC = () => {
-  const { posts, fetchPosts } = useBlogStore()
+  const { data: blogData } = useGetBlogsQuery()
   const { quizzes, fetchQuizzes } = useQuizStore()
   const { isAuthenticated } = useAuthStore()
 
+  const posts = (blogData?.getBlogs as Blog[]) || []
+
   useEffect(() => {
-    fetchPosts()
     fetchQuizzes()
-  }, [fetchPosts, fetchQuizzes])
+  }, [fetchQuizzes])
 
   return (
     <>

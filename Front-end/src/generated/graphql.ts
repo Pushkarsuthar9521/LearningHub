@@ -157,6 +157,7 @@ export type MutationUpdateUserArgs = {
 export type Query = {
   __typename?: 'Query';
   getBlog?: Maybe<Blog>;
+  getBlogBySlug?: Maybe<Blog>;
   getBlogs: Array<Blog>;
   getQuiz?: Maybe<Quiz>;
   getQuizzes: Array<Quiz>;
@@ -170,6 +171,11 @@ export type Query = {
 
 export type QueryGetBlogArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetBlogBySlugArgs = {
+  slug: Scalars['String']['input'];
 };
 
 
@@ -312,7 +318,41 @@ export type CreateBlogMutationVariables = Exact<{
 }>;
 
 
-export type CreateBlogMutation = { __typename?: 'Mutation', createBlog: { __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, featuredImage?: string | null, tags: Array<string>, category: string, status: BlogStatus, createdAt: string, updatedAt: string, author?: { __typename?: 'User', id: string, username: string, firstName: string, lastName: string } | null } };
+export type CreateBlogMutation = { __typename?: 'Mutation', createBlog: { __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, featuredImage?: string | null, tags: Array<string>, category: string, status: BlogStatus, viewCount: number, likeCount: number, publishedAt?: string | null, createdAt: string, updatedAt: string, authorId?: string | null, author?: { __typename?: 'User', id: string, email: string, username: string, firstName: string, lastName: string, role: UserRole, isActive: boolean, createdAt: string, updatedAt: string } | null } };
+
+export type DeleteBlogMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteBlogMutation = { __typename?: 'Mutation', deleteBlog: boolean };
+
+export type GetBlogQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetBlogQuery = { __typename?: 'Query', getBlog?: { __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, featuredImage?: string | null, tags: Array<string>, category: string, status: BlogStatus, viewCount: number, likeCount: number, publishedAt?: string | null, createdAt: string, updatedAt: string, authorId?: string | null, author?: { __typename?: 'User', id: string, email: string, username: string, firstName: string, lastName: string, role: UserRole, isActive: boolean, createdAt: string, updatedAt: string } | null } | null };
+
+export type GetBlogBySlugQueryVariables = Exact<{
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type GetBlogBySlugQuery = { __typename?: 'Query', getBlogBySlug?: { __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, category: string, createdAt: string, likeCount: number, publishedAt?: string | null, status: BlogStatus, tags: Array<string>, updatedAt: string, viewCount: number, author?: { __typename?: 'User', firstName: string, id: string } | null } | null };
+
+export type GetBlogsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetBlogsQuery = { __typename?: 'Query', getBlogs: Array<{ __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, featuredImage?: string | null, tags: Array<string>, category: string, status: BlogStatus, viewCount: number, likeCount: number, publishedAt?: string | null, createdAt: string, updatedAt: string, authorId?: string | null, author?: { __typename?: 'User', id: string, email: string, username: string, firstName: string, lastName: string, role: UserRole, isActive: boolean, createdAt: string, updatedAt: string } | null }> };
+
+export type UpdateBlogMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: BlogInput;
+}>;
+
+
+export type UpdateBlogMutation = { __typename?: 'Mutation', updateBlog?: { __typename?: 'Blog', id: string, title: string, slug?: string | null, content: string, excerpt?: string | null, featuredImage?: string | null, tags: Array<string>, category: string, status: BlogStatus, viewCount: number, likeCount: number, publishedAt?: string | null, createdAt: string, updatedAt: string, authorId?: string | null, author?: { __typename?: 'User', id: string, email: string, username: string, firstName: string, lastName: string, role: UserRole, isActive: boolean, createdAt: string, updatedAt: string } | null } | null };
 
 export type CreateQuizMutationVariables = Exact<{
   input: QuizInput;
@@ -354,13 +394,22 @@ export const CreateBlogDocument = gql`
     tags
     category
     status
+    viewCount
+    likeCount
+    publishedAt
     createdAt
     updatedAt
+    authorId
     author {
       id
+      email
       username
       firstName
       lastName
+      role
+      isActive
+      createdAt
+      updatedAt
     }
   }
 }
@@ -391,6 +440,281 @@ export function useCreateBlogMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateBlogMutationHookResult = ReturnType<typeof useCreateBlogMutation>;
 export type CreateBlogMutationResult = Apollo.MutationResult<CreateBlogMutation>;
 export type CreateBlogMutationOptions = Apollo.BaseMutationOptions<CreateBlogMutation, CreateBlogMutationVariables>;
+export const DeleteBlogDocument = gql`
+    mutation DeleteBlog($id: ID!) {
+  deleteBlog(id: $id)
+}
+    `;
+export type DeleteBlogMutationFn = Apollo.MutationFunction<DeleteBlogMutation, DeleteBlogMutationVariables>;
+
+/**
+ * __useDeleteBlogMutation__
+ *
+ * To run a mutation, you first call `useDeleteBlogMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteBlogMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteBlogMutation, { data, loading, error }] = useDeleteBlogMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteBlogMutation(baseOptions?: Apollo.MutationHookOptions<DeleteBlogMutation, DeleteBlogMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteBlogMutation, DeleteBlogMutationVariables>(DeleteBlogDocument, options);
+      }
+export type DeleteBlogMutationHookResult = ReturnType<typeof useDeleteBlogMutation>;
+export type DeleteBlogMutationResult = Apollo.MutationResult<DeleteBlogMutation>;
+export type DeleteBlogMutationOptions = Apollo.BaseMutationOptions<DeleteBlogMutation, DeleteBlogMutationVariables>;
+export const GetBlogDocument = gql`
+    query GetBlog($id: ID!) {
+  getBlog(id: $id) {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    viewCount
+    likeCount
+    publishedAt
+    createdAt
+    updatedAt
+    authorId
+    author {
+      id
+      email
+      username
+      firstName
+      lastName
+      role
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetBlogQuery__
+ *
+ * To run a query within a React component, call `useGetBlogQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBlogQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBlogQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetBlogQuery(baseOptions: Apollo.QueryHookOptions<GetBlogQuery, GetBlogQueryVariables> & ({ variables: GetBlogQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBlogQuery, GetBlogQueryVariables>(GetBlogDocument, options);
+      }
+export function useGetBlogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBlogQuery, GetBlogQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBlogQuery, GetBlogQueryVariables>(GetBlogDocument, options);
+        }
+export function useGetBlogSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBlogQuery, GetBlogQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBlogQuery, GetBlogQueryVariables>(GetBlogDocument, options);
+        }
+export type GetBlogQueryHookResult = ReturnType<typeof useGetBlogQuery>;
+export type GetBlogLazyQueryHookResult = ReturnType<typeof useGetBlogLazyQuery>;
+export type GetBlogSuspenseQueryHookResult = ReturnType<typeof useGetBlogSuspenseQuery>;
+export type GetBlogQueryResult = Apollo.QueryResult<GetBlogQuery, GetBlogQueryVariables>;
+export const GetBlogBySlugDocument = gql`
+    query GetBlogBySlug($slug: String!) {
+  getBlogBySlug(slug: $slug) {
+    id
+    title
+    slug
+    content
+    excerpt
+    author {
+      firstName
+      id
+    }
+    category
+    createdAt
+    likeCount
+    publishedAt
+    status
+    tags
+    updatedAt
+    viewCount
+  }
+}
+    `;
+
+/**
+ * __useGetBlogBySlugQuery__
+ *
+ * To run a query within a React component, call `useGetBlogBySlugQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBlogBySlugQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBlogBySlugQuery({
+ *   variables: {
+ *      slug: // value for 'slug'
+ *   },
+ * });
+ */
+export function useGetBlogBySlugQuery(baseOptions: Apollo.QueryHookOptions<GetBlogBySlugQuery, GetBlogBySlugQueryVariables> & ({ variables: GetBlogBySlugQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBlogBySlugQuery, GetBlogBySlugQueryVariables>(GetBlogBySlugDocument, options);
+      }
+export function useGetBlogBySlugLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBlogBySlugQuery, GetBlogBySlugQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBlogBySlugQuery, GetBlogBySlugQueryVariables>(GetBlogBySlugDocument, options);
+        }
+export function useGetBlogBySlugSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBlogBySlugQuery, GetBlogBySlugQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBlogBySlugQuery, GetBlogBySlugQueryVariables>(GetBlogBySlugDocument, options);
+        }
+export type GetBlogBySlugQueryHookResult = ReturnType<typeof useGetBlogBySlugQuery>;
+export type GetBlogBySlugLazyQueryHookResult = ReturnType<typeof useGetBlogBySlugLazyQuery>;
+export type GetBlogBySlugSuspenseQueryHookResult = ReturnType<typeof useGetBlogBySlugSuspenseQuery>;
+export type GetBlogBySlugQueryResult = Apollo.QueryResult<GetBlogBySlugQuery, GetBlogBySlugQueryVariables>;
+export const GetBlogsDocument = gql`
+    query GetBlogs {
+  getBlogs {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    viewCount
+    likeCount
+    publishedAt
+    createdAt
+    updatedAt
+    authorId
+    author {
+      id
+      email
+      username
+      firstName
+      lastName
+      role
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetBlogsQuery__
+ *
+ * To run a query within a React component, call `useGetBlogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBlogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBlogsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetBlogsQuery(baseOptions?: Apollo.QueryHookOptions<GetBlogsQuery, GetBlogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBlogsQuery, GetBlogsQueryVariables>(GetBlogsDocument, options);
+      }
+export function useGetBlogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBlogsQuery, GetBlogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBlogsQuery, GetBlogsQueryVariables>(GetBlogsDocument, options);
+        }
+export function useGetBlogsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBlogsQuery, GetBlogsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBlogsQuery, GetBlogsQueryVariables>(GetBlogsDocument, options);
+        }
+export type GetBlogsQueryHookResult = ReturnType<typeof useGetBlogsQuery>;
+export type GetBlogsLazyQueryHookResult = ReturnType<typeof useGetBlogsLazyQuery>;
+export type GetBlogsSuspenseQueryHookResult = ReturnType<typeof useGetBlogsSuspenseQuery>;
+export type GetBlogsQueryResult = Apollo.QueryResult<GetBlogsQuery, GetBlogsQueryVariables>;
+export const UpdateBlogDocument = gql`
+    mutation UpdateBlog($id: ID!, $input: BlogInput!) {
+  updateBlog(id: $id, input: $input) {
+    id
+    title
+    slug
+    content
+    excerpt
+    featuredImage
+    tags
+    category
+    status
+    viewCount
+    likeCount
+    publishedAt
+    createdAt
+    updatedAt
+    authorId
+    author {
+      id
+      email
+      username
+      firstName
+      lastName
+      role
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+export type UpdateBlogMutationFn = Apollo.MutationFunction<UpdateBlogMutation, UpdateBlogMutationVariables>;
+
+/**
+ * __useUpdateBlogMutation__
+ *
+ * To run a mutation, you first call `useUpdateBlogMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBlogMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBlogMutation, { data, loading, error }] = useUpdateBlogMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateBlogMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBlogMutation, UpdateBlogMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBlogMutation, UpdateBlogMutationVariables>(UpdateBlogDocument, options);
+      }
+export type UpdateBlogMutationHookResult = ReturnType<typeof useUpdateBlogMutation>;
+export type UpdateBlogMutationResult = Apollo.MutationResult<UpdateBlogMutation>;
+export type UpdateBlogMutationOptions = Apollo.BaseMutationOptions<UpdateBlogMutation, UpdateBlogMutationVariables>;
 export const CreateQuizDocument = gql`
     mutation CreateQuiz($input: QuizInput!, $questions: [QuestionInput!]!) {
   createQuiz(input: $input, questions: $questions) {

@@ -1,0 +1,21 @@
+query GetBlogBySlug($slug: String!) {
+  getBlogBySlug(slug: $slug) {
+    id
+    title
+    slug
+    content
+    excerpt
+    author {
+      firstName
+      id
+    }
+    category
+    createdAt
+    likeCount
+    publishedAt
+    status
+    tags
+    updatedAt
+    viewCount
+  }
+}

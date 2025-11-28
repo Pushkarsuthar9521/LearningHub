@@ -23,6 +23,11 @@ export class BlogResolver {
     return await Blog.findOne({ where: { id }, relations: ['author'] })
   }
 
+  @Query(() => Blog, { nullable: true })
+  async getBlogBySlug(@Arg('slug') slug: string): Promise<Blog | null> {
+    return await Blog.findOne({ where: { slug }, relations: ['author'] })
+  }
+
   // @Authorized()
   @Authorized()
   @Mutation(() => Blog)
