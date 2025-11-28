@@ -99,8 +99,8 @@ const Header: React.FC = () => {
             </button>
             {isAuthenticated && user ? (
               <Dropdown overlay={menu} placement="bottomRight">
-                <div className="flex items-center space-x-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Avatar className="bg-gradient-to-r from-blue-500 to-purple-600">
+                <div className="flex items-center  space-x-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Avatar className="bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                     {user.firstName ? (
                       user.firstName.charAt(0).toUpperCase()
                     ) : (
@@ -108,10 +108,9 @@ const Header: React.FC = () => {
                     )}
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm mt-3 font-semibold text-gray-900">
                       {user.firstName || user.username}
                     </p>
-                    <p className="text-xs text-gray-500">View Profile</p>
                   </div>
                 </div>
               </Dropdown>
