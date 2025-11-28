@@ -1,25 +1,49 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Clock, Award, User, Book } from 'lucide-react';
-import { Card, CardContent } from '../ui/Card';
-import Button from '../ui/Button';
-import { Quiz } from '../../types';
-import { formatDate, truncateText } from '../../lib/utils';
+import { Award, Book, Clock, User } from 'lucide-react'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { truncateText } from '../../lib/utils'
+import Button from '../ui/Button'
+import { Card, CardContent } from '../ui/Card'
+
+interface Author {
+  id: string
+  username: string
+  email?: string
+  firstName?: string
+  lastName?: string
+}
+
+interface QuizCardQuiz {
+  id: string
+  title: string
+  slug: string
+  description?: string | null
+  category: string
+  difficulty: string
+  timeLimit?: number | null
+  totalQuestions: number
+  featuredImage?: string | null
+  tags?: string[]
+  author?: Author
+}
 
 interface QuizCardProps {
-  quiz: Quiz;
-  variant?: 'default' | 'featured' | 'compact';
+  quiz: QuizCardQuiz
+  variant?: 'default' | 'featured' | 'compact'
 }
 
 const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
   if (variant === 'featured') {
     return (
-      <Card className="group overflow-hidden hover:shadow-lg transition-shadow duration-300\" hoverable>
+      <Card
+        className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        hoverable
+      >
         <div className="md:flex">
           <div className="md:w-2/5 h-56 md:h-auto relative">
-            <img 
-              src={quiz.coverImage} 
-              alt={quiz.title} 
+            <img
+              src={quiz.featuredImage || 'https://via.placeholder.com/400x300'}
+              alt={quiz.title}
               className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute top-4 left-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -30,12 +54,12 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
             <div className="flex items-center text-sm text-gray-500 mb-2">
               <span className="flex items-center">
                 <User className="h-4 w-4 mr-1" />
-                {quiz.author.name}
+                {quiz.author?.username || 'Unknown'}
               </span>
               <span className="mx-2">•</span>
               <span className="flex items-center">
                 <Book className="h-4 w-4 mr-1" />
-                {quiz.questions.length} questions
+                {quiz.totalQuestions} questions
               </span>
             </div>
             <Link to={`/quizzes/${quiz.slug}`}>
@@ -53,30 +77,30 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
               )}
               <span className="flex items-center text-sm text-gray-600">
                 <Award className="h-4 w-4 mr-1 text-purple-600" />
-                Beginner
+                {quiz.difficulty}
               </span>
             </div>
-            <Button 
-              variant="secondary" 
-              as={Link} 
-              to={`/quizzes/${quiz.slug}`}
-              className="mt-2"
-            >
-              Start Quiz
-            </Button>
+            <Link to={`/quizzes/${quiz.slug}`}>
+              <Button variant="secondary" className="mt-2">
+                Go to Quiz
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>
-    );
+    )
   }
 
   if (variant === 'compact') {
     return (
-      <Card className="hover:shadow-md transition-shadow duration-300" hoverable>
+      <Card
+        className="hover:shadow-md transition-shadow duration-300"
+        hoverable
+      >
         <CardContent className="p-4">
           <div className="flex items-center text-xs text-gray-500 mb-1">
             <Book className="h-3 w-3 mr-1" />
-            {quiz.questions.length} questions
+            {quiz.totalQuestions} questions
           </div>
           <Link to={`/quizzes/${quiz.slug}`}>
             <h3 className="text-base font-medium text-gray-900 hover:text-purple-600 transition-colors">
@@ -85,16 +109,19 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
           </Link>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   // Default variant
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300" hoverable>
+    <Card
+      className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
+      hoverable
+    >
       <div className="h-48 overflow-hidden relative">
-        <img 
-          src={quiz.coverImage} 
-          alt={quiz.title} 
+        <img
+          src={quiz.featuredImage || 'https://via.placeholder.com/400x300'}
+          alt={quiz.title}
           className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
         />
       </div>
@@ -102,12 +129,12 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
         <div className="flex items-center text-sm text-gray-500 mb-2">
           <span className="flex items-center">
             <User className="h-4 w-4 mr-1" />
-            {quiz.author.name}
+            {quiz.author?.username || 'Unknown'}
           </span>
           <span className="mx-2">•</span>
           <span className="flex items-center">
             <Book className="h-4 w-4 mr-1" />
-            {quiz.questions.length} questions
+            {quiz.totalQuestions} questions
           </span>
         </div>
         <Link to={`/quizzes/${quiz.slug}`}>
@@ -115,18 +142,23 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
             {quiz.title}
           </h3>
         </Link>
-        <p className="text-gray-600 mb-4">{truncateText(quiz.description, 100)}</p>
+        <p className="text-gray-600 mb-4">
+          {truncateText(quiz.description || '', 100)}
+        </p>
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            {quiz.categories.slice(0, 2).map((category) => (
-              <Link 
-                key={category.id} 
-                to={`/quizzes/category/${category.slug}`}
-                className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full hover:bg-purple-200 transition-colors"
-              >
-                {category.name}
-              </Link>
-            ))}
+            <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+              {quiz.category}
+            </span>
+            {quiz.tags &&
+              quiz.tags.slice(0, 2).map(tag => (
+                <span
+                  key={tag}
+                  className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
           </div>
           {quiz.timeLimit && (
             <span className="flex items-center text-sm text-gray-600">
@@ -137,7 +169,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default QuizCard;
+export default QuizCard

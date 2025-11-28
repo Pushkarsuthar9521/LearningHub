@@ -10,16 +10,58 @@ import {
   CardHeader,
   CardTitle
 } from '../components/ui/Card'
-import useQuizStore from '../store/quizStore'
-import { Quiz, QuizAttempt } from '../types'
+import {
+  useGetQuizBySlugLazyQuery,
+  useSubmitQuizAttemptMutation
+} from '../generated/graphql'
+
+interface QuizQuestion {
+  id: string
+  questionText: string
+  explanation?: string
+  orderIndex: number
+  points: number
+  imageUrl?: string
+  answers: {
+    id: string
+    answerText: string
+    isCorrect: boolean
+    orderIndex: number
+    explanation?: string
+  }[]
+}
+
+interface Quiz {
+  id: string
+  title: string
+  slug: string
+  description?: string
+  category: string
+  difficulty: string
+  status: string
+  timeLimit?: number
+  totalAttempts: number
+  totalQuestions: number
+  featuredImage?: string
+  tags: string[]
+  author: {
+    id: string
+    username: string
+    email: string
+    firstName?: string
+    lastName?: string
+  }
+  questions: QuizQuestion[]
+}
 
 const QuizPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { fetchQuizBySlug, submitQuizAttempt } = useQuizStore()
+  const [getQuizBySlug, { data: quizData, loading }] =
+    useGetQuizBySlugLazyQuery()
+  const [submitQuizAttemptMutation] = useSubmitQuizAttemptMutation()
 
-  const [quiz, setQuiz] = useState<Quiz | null>(null)
-  const [loading, setLoading] = useState(true)
+  const quiz = quizData?.getQuizBySlug as Quiz | null
   const [started, setStarted] = useState(false)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userAnswers, setUserAnswers] = useState<number[]>([])
@@ -29,28 +71,24 @@ const QuizPage: React.FC = () => {
   const [score, setScore] = useState(0)
 
   useEffect(() => {
-    const loadQuiz = async () => {
-      if (slug) {
-        setLoading(true)
-        const fetchedQuiz = await fetchQuizBySlug(slug)
-        if (fetchedQuiz) {
-          setQuiz(fetchedQuiz)
-          document.title = `Quiz: ${fetchedQuiz.title}`
+    if (slug) {
+      getQuizBySlug({ variables: { slug } })
+    }
+  }, [slug, getQuizBySlug])
 
-          // Initialize answers array
-          setUserAnswers(new Array(fetchedQuiz.questions.length).fill(-1))
+  useEffect(() => {
+    if (quiz) {
+      document.title = `Quiz: ${quiz.title}`
 
-          // Set time if there's a time limit
-          if (fetchedQuiz.timeLimit) {
-            setTimeLeft(fetchedQuiz.timeLimit * 60) // convert to seconds
-          }
-        }
-        setLoading(false)
+      // Initialize answers array
+      setUserAnswers(new Array(quiz.questions.length).fill(-1))
+
+      // Set time if there's a time limit
+      if (quiz.timeLimit) {
+        setTimeLeft(quiz.timeLimit * 60) // convert to seconds
       }
     }
-
-    loadQuiz()
-  }, [slug, fetchQuizBySlug])
+  }, [quiz])
 
   // Timer effect
   useEffect(() => {
@@ -58,7 +96,7 @@ const QuizPage: React.FC = () => {
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
+        if (prev === null || prev <= 1) {
           // Time's up
           clearInterval(timer)
           finishQuiz()
@@ -96,14 +134,21 @@ const QuizPage: React.FC = () => {
     }
   }
 
-  const finishQuiz = () => {
+  const finishQuiz = async () => {
     if (!quiz) return
 
     // Calculate score
     let correctAnswers = 0
+    const userAnswersMap: Record<string, string> = {}
+
     quiz.questions.forEach((question, index) => {
-      if (userAnswers[index] === question.correctAnswer) {
+      const correctAnswerIndex = question.answers.findIndex(a => a.isCorrect)
+      if (userAnswers[index] === correctAnswerIndex) {
         correctAnswers++
+      }
+      // Store user's answer by question ID
+      if (userAnswers[index] >= 0) {
+        userAnswersMap[question.id] = question.answers[userAnswers[index]].id
       }
     })
 
@@ -113,15 +158,26 @@ const QuizPage: React.FC = () => {
     setScore(finalScore)
 
     // Submit quiz attempt
-    const attempt: Omit<QuizAttempt, 'id' | 'completedAt'> = {
-      quizId: quiz.id,
-      userId: '1', // Using mock user ID for demo
-      answers: userAnswers,
-      score: finalScore,
-      timeSpent: quiz.timeLimit ? quiz.timeLimit * 60 - (timeLeft || 0) : 0
+    try {
+      await submitQuizAttemptMutation({
+        variables: {
+          input: {
+            quizId: quiz.id,
+            score: finalScore,
+            totalQuestions: quiz.questions.length,
+            correctAnswers,
+            timeSpent: quiz.timeLimit
+              ? quiz.timeLimit * 60 - (timeLeft || 0)
+              : 0,
+            userAnswers: userAnswersMap,
+            isCompleted: true
+          }
+        }
+      })
+    } catch (error) {
+      console.error('Error submitting quiz attempt:', error)
     }
 
-    submitQuizAttempt(attempt)
     setQuizCompleted(true)
   }
 
@@ -180,7 +236,10 @@ const QuizPage: React.FC = () => {
               <div className="md:flex">
                 <div className="md:w-2/5 h-48 md:h-auto relative">
                   <img
-                    src={quiz.coverImage}
+                    src={
+                      quiz.featuredImage ||
+                      'https://via.placeholder.com/400x300'
+                    }
                     alt={quiz.title}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -206,16 +265,16 @@ const QuizPage: React.FC = () => {
                       )}
                       <span className="flex items-center text-sm text-gray-600">
                         <User className="h-4 w-4 mr-1 text-purple-600" />
-                        By {quiz.author.name}
+                        By {quiz.author.username}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {quiz.categories.map(category => (
+                      {quiz.tags?.map((tag, index) => (
                         <span
-                          key={category.id}
+                          key={index}
                           className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full"
                         >
-                          {category.name}
+                          {tag}
                         </span>
                       ))}
                     </div>
@@ -277,10 +336,12 @@ const QuizPage: React.FC = () => {
                   <p className="text-gray-600 mb-6">
                     You scored {score}% (
                     {
-                      userAnswers.filter(
-                        (answer, index) =>
-                          answer === quiz.questions[index].correctAnswer
-                      ).length
+                      userAnswers.filter((answer, index) => {
+                        const correctAnswerIndex = quiz.questions[
+                          index
+                        ].answers.findIndex(a => a.isCorrect)
+                        return answer === correctAnswerIndex
+                      }).length
                     }{' '}
                     out of {quiz.questions.length} correct)
                   </p>
@@ -290,34 +351,48 @@ const QuizPage: React.FC = () => {
                       Your Answers
                     </h3>
                     <div className="space-y-3 max-w-md mx-auto">
-                      {quiz.questions.map((question, index) => (
-                        <div key={index} className="flex items-start text-left">
-                          <div className="flex-shrink-0">
-                            {userAnswers[index] === question.correctAnswer ? (
-                              <Check className="h-5 w-5 text-green-500" />
-                            ) : (
-                              <X className="h-5 w-5 text-red-500" />
-                            )}
-                          </div>
-                          <div className="ml-3">
-                            <p className="text-sm text-gray-800">
-                              {question.question}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              Your answer:{' '}
-                              {userAnswers[index] >= 0
-                                ? question.options[userAnswers[index]]
-                                : 'Not answered'}
-                            </p>
-                            {userAnswers[index] !== question.correctAnswer && (
-                              <p className="text-xs text-green-600">
-                                Correct answer:{' '}
-                                {question.options[question.correctAnswer]}
+                      {quiz.questions.map((question, index) => {
+                        const correctAnswerIndex = question.answers.findIndex(
+                          a => a.isCorrect
+                        )
+                        const isCorrect =
+                          userAnswers[index] === correctAnswerIndex
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-start text-left"
+                          >
+                            <div className="flex-shrink-0">
+                              {isCorrect ? (
+                                <Check className="h-5 w-5 text-green-500" />
+                              ) : (
+                                <X className="h-5 w-5 text-red-500" />
+                              )}
+                            </div>
+                            <div className="ml-3">
+                              <p className="text-sm text-gray-800">
+                                {question.questionText}
                               </p>
-                            )}
+                              <p className="text-xs text-gray-600">
+                                Your answer:{' '}
+                                {userAnswers[index] >= 0
+                                  ? question.answers[userAnswers[index]]
+                                      .answerText
+                                  : 'Not answered'}
+                              </p>
+                              {!isCorrect && correctAnswerIndex >= 0 && (
+                                <p className="text-xs text-green-600">
+                                  Correct answer:{' '}
+                                  {
+                                    question.answers[correctAnswerIndex]
+                                      .answerText
+                                  }
+                                </p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
 
@@ -368,15 +443,17 @@ const QuizPage: React.FC = () => {
               </div>
 
               {/* Current Question */}
-              <QuizQuestion
-                question={quiz.questions[currentQuestionIndex]}
-                questionNumber={currentQuestionIndex + 1}
-                totalQuestions={quiz.questions.length}
-                onAnswer={handleAnswer}
-                showResult={showResult}
-                userAnswer={userAnswers[currentQuestionIndex]}
-                onNext={nextQuestion}
-              />
+              {quiz.questions && quiz.questions[currentQuestionIndex] && (
+                <QuizQuestion
+                  question={quiz.questions[currentQuestionIndex]}
+                  questionNumber={currentQuestionIndex + 1}
+                  totalQuestions={quiz.questions.length}
+                  onAnswer={handleAnswer}
+                  showResult={showResult}
+                  userAnswer={userAnswers[currentQuestionIndex]}
+                  onNext={nextQuestion}
+                />
+              )}
             </div>
           )}
         </div>

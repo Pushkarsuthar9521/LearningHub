@@ -1,31 +1,59 @@
 import { Filter, Search } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import QuizCard from '../components/quiz/QuizCard'
 import { Card, CardContent } from '../components/ui/Card'
 import Input from '../components/ui/Input'
-import useQuizStore from '../store/quizStore'
-import { Quiz } from '../types'
+import { useGetQuizzesQuery } from '../generated/graphql'
+
+interface Quiz {
+  id: string
+  title: string
+  slug: string
+  description: string
+  category: string
+  difficulty: string
+  status: string
+  timeLimit?: number
+  totalAttempts: number
+  totalQuestions: number
+  featuredImage?: string
+  tags: string[]
+  author?: {
+    id: string
+    username: string
+  }
+}
 
 const QuizzesPage: React.FC = () => {
-  const {
-    quizzes,
-    categories,
-    tags,
-    fetchQuizzes,
-    fetchCategories,
-    fetchTags
-  } = useQuizStore()
+  const { data: quizData } = useGetQuizzesQuery()
+  const quizzes = useMemo(
+    () => (quizData?.getQuizzes || []) as Quiz[],
+    [quizData]
+  )
+
   const [filteredQuizzes, setFilteredQuizzes] = useState<Quiz[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchQuizzes()
-    fetchCategories()
-    fetchTags()
-  }, [fetchQuizzes, fetchCategories, fetchTags])
+  // Extract unique categories and tags from quizzes
+  const categories = Array.from(new Set(quizzes.map(q => q.category))).map(
+    cat => ({
+      id: cat,
+      name: cat,
+      slug: cat.toLowerCase().replace(/\s+/g, '-'),
+      description: `Browse ${cat} quizzes`
+    })
+  )
+
+  const tags = Array.from(new Set(quizzes.flatMap(q => q.tags || []))).map(
+    tag => ({
+      id: tag,
+      name: tag,
+      slug: tag.toLowerCase().replace(/\s+/g, '-')
+    })
+  )
 
   useEffect(() => {
     let result = [...quizzes]
@@ -36,21 +64,19 @@ const QuizzesPage: React.FC = () => {
       result = result.filter(
         quiz =>
           quiz.title.toLowerCase().includes(query) ||
-          quiz.description.toLowerCase().includes(query)
+          (quiz.description && quiz.description.toLowerCase().includes(query))
       )
     }
 
     // Apply category filter
     if (selectedCategory) {
-      result = result.filter(quiz =>
-        quiz.categories.some(category => category.id === selectedCategory)
-      )
+      result = result.filter(quiz => quiz.category === selectedCategory)
     }
 
     // Apply tag filter
     if (selectedTag) {
-      result = result.filter(quiz =>
-        quiz.tags.some(tag => tag.id === selectedTag)
+      result = result.filter(
+        quiz => quiz.tags && quiz.tags.includes(selectedTag)
       )
     }
 

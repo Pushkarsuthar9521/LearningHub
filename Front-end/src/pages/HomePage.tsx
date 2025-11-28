@@ -1,23 +1,23 @@
 import { ArrowRight, BookOpen, GraduationCap, Search } from 'lucide-react'
-import { FC, useEffect } from 'react'
+import { FC } from 'react'
 import { Link } from 'react-router-dom'
 import BlogCard from '../components/blog/BlogCard'
 import QuizCard from '../components/quiz/QuizCard'
 import Button from '../components/ui/Button'
-import { Blog, useGetBlogsQuery } from '../generated/graphql'
+import {
+  Blog,
+  useGetBlogsQuery,
+  useGetQuizzesQuery
+} from '../generated/graphql'
 import { useAuthStore } from '../store/authStore'
-import useQuizStore from '../store/quizStore'
 
 const HomePage: FC = () => {
   const { data: blogData } = useGetBlogsQuery()
-  const { quizzes, fetchQuizzes } = useQuizStore()
+  const { data: quizData } = useGetQuizzesQuery()
   const { isAuthenticated } = useAuthStore()
 
   const posts = (blogData?.getBlogs as Blog[]) || []
-
-  useEffect(() => {
-    fetchQuizzes()
-  }, [fetchQuizzes])
+  const quizzes = quizData?.getQuizzes || []
 
   return (
     <>

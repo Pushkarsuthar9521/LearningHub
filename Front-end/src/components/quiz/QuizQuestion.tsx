@@ -1,17 +1,34 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle, XCircle } from 'lucide-react';
-import Button from '../ui/Button';
-import { QuizQuestion as QuizQuestionType } from '../../types';
+import { motion } from 'framer-motion'
+import { CheckCircle, XCircle } from 'lucide-react'
+import React, { useState } from 'react'
+import Button from '../ui/Button'
+
+interface QuizQuestionAnswer {
+  id: string
+  answerText: string
+  isCorrect: boolean
+  orderIndex: number
+  explanation?: string
+}
+
+interface QuizQuestionType {
+  id: string
+  questionText: string
+  explanation?: string
+  orderIndex: number
+  points: number
+  imageUrl?: string
+  answers: QuizQuestionAnswer[]
+}
 
 interface QuizQuestionProps {
-  question: QuizQuestionType;
-  questionNumber: number;
-  totalQuestions: number;
-  onAnswer: (selectedOption: number) => void;
-  showResult: boolean;
-  userAnswer: number | null;
-  onNext: () => void;
+  question: QuizQuestionType
+  questionNumber: number
+  totalQuestions: number
+  onAnswer: (selectedOption: number) => void
+  showResult: boolean
+  userAnswer: number | null
+  onNext: () => void
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
@@ -21,37 +38,48 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   onAnswer,
   showResult,
   userAnswer,
-  onNext,
+  onNext
 }) => {
-  const [selectedOption, setSelectedOption] = useState<number | null>(userAnswer);
+  const [selectedOption, setSelectedOption] = useState<number | null>(
+    userAnswer
+  )
+
+  // Add safety check for question and answers
+  if (!question || !question.answers) {
+    return null
+  }
+
+  const correctAnswerIndex = question.answers.findIndex(a => a.isCorrect)
 
   const handleOptionSelect = (index: number) => {
-    if (showResult) return;
-    setSelectedOption(index);
-    onAnswer(index);
-  };
+    if (showResult) return
+    setSelectedOption(index)
+    onAnswer(index)
+  }
 
   const getOptionClassName = (index: number) => {
-    let className = "flex p-4 mb-3 border rounded-lg transition-all duration-200 cursor-pointer ";
-    
+    let className =
+      'flex p-4 mb-3 border rounded-lg transition-all duration-200 cursor-pointer '
+
     if (selectedOption === index) {
-      className += "border-2 ";
-      
+      className += 'border-2 '
+
       if (showResult) {
-        className += index === question.correctAnswer 
-          ? "border-green-500 bg-green-50" 
-          : "border-red-500 bg-red-50";
+        className +=
+          index === correctAnswerIndex
+            ? 'border-green-500 bg-green-50'
+            : 'border-red-500 bg-red-50'
       } else {
-        className += "border-blue-500 bg-blue-50";
+        className += 'border-blue-500 bg-blue-50'
       }
-    } else if (showResult && index === question.correctAnswer) {
-      className += "border-green-500 bg-green-50";
+    } else if (showResult && index === correctAnswerIndex) {
+      className += 'border-green-500 bg-green-50'
     } else {
-      className += "border-gray-200 hover:border-gray-300 hover:bg-gray-50";
+      className += 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
     }
-    
-    return className;
-  };
+
+    return className
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -64,26 +92,39 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
             Multiple Choice
           </span>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900">{question.question}</h3>
+        <h3 className="text-xl font-semibold text-gray-900">
+          {question.questionText}
+        </h3>
+        {question.imageUrl && (
+          <div className="mt-4">
+            <img
+              src={question.imageUrl}
+              alt="Question"
+              className="max-w-full h-auto rounded-lg"
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-3 mb-6">
-        {question.options.map((option, index) => (
+        {question.answers.map((answer, index) => (
           <motion.div
-            key={index}
+            key={answer.id}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleOptionSelect(index)}
             className={getOptionClassName(index)}
           >
             <div className="flex-grow">
-              <span className="text-gray-800">{option}</span>
+              <span className="text-gray-800">{answer.answerText}</span>
             </div>
-            {showResult && index === question.correctAnswer && (
+            {showResult && index === correctAnswerIndex && (
               <CheckCircle className="h-5 w-5 text-green-500 ml-2" />
             )}
-            {showResult && selectedOption === index && index !== question.correctAnswer && (
-              <XCircle className="h-5 w-5 text-red-500 ml-2" />
-            )}
+            {showResult &&
+              selectedOption === index &&
+              index !== correctAnswerIndex && (
+                <XCircle className="h-5 w-5 text-red-500 ml-2" />
+              )}
           </motion.div>
         ))}
       </div>
@@ -99,7 +140,9 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
         {!showResult ? (
           <Button
             variant="primary"
-            onClick={() => onAnswer(selectedOption !== null ? selectedOption : 0)}
+            onClick={() =>
+              onAnswer(selectedOption !== null ? selectedOption : 0)
+            }
             disabled={selectedOption === null}
           >
             Check Answer
@@ -111,7 +154,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default QuizQuestion;
+export default QuizQuestion
