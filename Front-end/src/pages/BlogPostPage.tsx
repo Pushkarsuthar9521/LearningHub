@@ -6,30 +6,30 @@ import remarkGfm from 'remark-gfm'
 import BlogCard from '../components/blog/BlogCard'
 import {
   Blog,
-  useGetBlogBySlugLazyQuery,
+  useGetBlogLazyQuery,
   useGetBlogsLazyQuery
 } from '../generated/graphql'
 import { formatDate } from '../lib/utils'
 
 const BlogPostPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>()
+  const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<Blog | null>(null)
   const [relatedPosts, setRelatedPosts] = useState<Blog[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [getBlogBySlug] = useGetBlogBySlugLazyQuery()
+  const [getBlog] = useGetBlogLazyQuery()
   const [getBlogs] = useGetBlogsLazyQuery()
 
   useEffect(() => {
     const loadPost = async () => {
-      if (slug) {
+      if (id) {
         setLoading(true)
-        await getBlogBySlug({
-          variables: { slug },
+        await getBlog({
+          variables: { id },
           onCompleted: data => {
-            if (data.getBlogBySlug) {
-              setPost((data?.getBlogBySlug as Blog) || null)
-              document.title = data.getBlogBySlug.title
+            if (data.getBlog) {
+              setPost((data?.getBlog as Blog) || null)
+              document.title = data.getBlog.title
             }
             setLoading(false)
           }
@@ -38,7 +38,7 @@ const BlogPostPage: React.FC = () => {
     }
 
     loadPost()
-  }, [slug, getBlogBySlug])
+  }, [id, getBlog])
 
   useEffect(() => {
     const loadRelatedPosts = async () => {

@@ -62,7 +62,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
                 {quiz.totalQuestions} questions
               </span>
             </div>
-            <Link to={`/quizzes/${quiz.slug}`}>
+            <Link to={`/quizzes/${quiz.id}`}>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
                 {quiz.title}
               </h3>
@@ -80,7 +80,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
                 {quiz.difficulty}
               </span>
             </div>
-            <Link to={`/quizzes/${quiz.slug}`}>
+            <Link to={`/quizzes/${quiz.id}`}>
               <Button variant="secondary" className="mt-2">
                 Go to Quiz
               </Button>
@@ -102,7 +102,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
             <Book className="h-3 w-3 mr-1" />
             {quiz.totalQuestions} questions
           </div>
-          <Link to={`/quizzes/${quiz.slug}`}>
+          <Link to={`/quizzes/${quiz.id}`}>
             <h3 className="text-base font-medium text-gray-900 hover:text-purple-600 transition-colors">
               {truncateText(quiz.title, 60)}
             </h3>
@@ -137,7 +137,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, variant = 'default' }) => {
             {quiz.totalQuestions} questions
           </span>
         </div>
-        <Link to={`/quizzes/${quiz.slug}`}>
+        <Link to={`/quizzes/${quiz.id}`}>
           <h3 className="text-xl font-semibold text-gray-900 mb-2 hover:text-purple-600 transition-colors">
             {quiz.title}
           </h3>

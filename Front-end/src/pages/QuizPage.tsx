@@ -11,7 +11,7 @@ import {
   CardTitle
 } from '../components/ui/Card'
 import {
-  useGetQuizBySlugLazyQuery,
+  useGetQuizByIdLazyQuery,
   useSubmitQuizAttemptMutation
 } from '../generated/graphql'
 
@@ -55,13 +55,12 @@ interface Quiz {
 }
 
 const QuizPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [getQuizBySlug, { data: quizData, loading }] =
-    useGetQuizBySlugLazyQuery()
+  const [getQuizById, { data: quizData, loading }] = useGetQuizByIdLazyQuery()
   const [submitQuizAttemptMutation] = useSubmitQuizAttemptMutation()
 
-  const quiz = quizData?.getQuizBySlug as Quiz | null
+  const quiz = quizData?.getQuizById as Quiz | null
   const [started, setStarted] = useState(false)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userAnswers, setUserAnswers] = useState<number[]>([])
@@ -71,10 +70,10 @@ const QuizPage: React.FC = () => {
   const [score, setScore] = useState(0)
 
   useEffect(() => {
-    if (slug) {
-      getQuizBySlug({ variables: { slug } })
+    if (id) {
+      getQuizById({ variables: { id } })
     }
-  }, [slug, getQuizBySlug])
+  }, [id, getQuizById])
 
   useEffect(() => {
     if (quiz) {

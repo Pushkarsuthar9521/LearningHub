@@ -37,7 +37,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, variant = 'default' }) => {
                 {post.author?.firstName} {post.author?.lastName}
               </span>
             </div>
-            <Link to={`/blog/${post.slug}`}>
+            <Link to={`/blog/${post.id}`}>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                 {post.title}
               </h3>
@@ -65,7 +65,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, variant = 'default' }) => {
             <Calendar className="h-3 w-3 mr-1" />
             {formatDate(post.createdAt)}
           </div>
-          <Link to={`/blog/${post.slug}`}>
+          <Link to={`/blog/${post.id}`}>
             <h3 className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors">
               {truncateText(post.title, 60)}
             </h3>
@@ -100,7 +100,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, variant = 'default' }) => {
             {post.author?.firstName} {post.author?.lastName}
           </span>
         </div>
-        <Link to={`/blog/${post.slug}`}>
+        <Link to={`/blog/${post.id}`}>
           <h3 className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
             {post.title}
           </h3>
