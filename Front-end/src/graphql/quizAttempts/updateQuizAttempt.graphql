@@ -1,0 +1,25 @@
+mutation UpdateQuizAttempt($id: ID!, $input: QuizAttemptInput!) {
+  updateQuizAttempt(id: $id, input: $input) {
+    id
+    score
+    totalQuestions
+    correctAnswers
+    percentage
+    timeSpent
+    userAnswers
+    isCompleted
+    startedAt
+    completedAt
+    updatedAt
+    quiz {
+      id
+      title
+      slug
+    }
+    user {
+      id
+      username
+      email
+    }
+  }
+}

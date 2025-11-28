@@ -1,0 +1,41 @@
+query GetQuizById($id: ID!) {
+  getQuizById(id: $id) {
+    id
+    title
+    slug
+    description
+    category
+    difficulty
+    status
+    timeLimit
+    totalAttempts
+    totalQuestions
+    featuredImage
+    tags
+    createdAt
+    updatedAt
+    author {
+      id
+      username
+      email
+      firstName
+      lastName
+      role
+    }
+    questions {
+      id
+      questionText
+      explanation
+      orderIndex
+      points
+      imageUrl
+      answers {
+        id
+        answerText
+        isCorrect
+        orderIndex
+        explanation
+      }
+    }
+  }
+}

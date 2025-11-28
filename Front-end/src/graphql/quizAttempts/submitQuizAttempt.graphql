@@ -1,0 +1,33 @@
+mutation SubmitQuizAttempt($input: QuizAttemptInput!) {
+  submitQuizAttempt(input: $input) {
+    id
+    score
+    totalQuestions
+    correctAnswers
+    percentage
+    timeSpent
+    userAnswers
+    isCompleted
+    startedAt
+    completedAt
+    updatedAt
+    quiz {
+      id
+      title
+      slug
+      description
+      category
+      difficulty
+      featuredImage
+      tags
+      totalAttempts
+    }
+    user {
+      id
+      username
+      email
+      firstName
+      lastName
+    }
+  }
+}

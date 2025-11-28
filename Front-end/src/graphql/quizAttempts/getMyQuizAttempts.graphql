@@ -1,0 +1,32 @@
+query GetMyQuizAttempts {
+  getMyQuizAttempts {
+    id
+    score
+    totalQuestions
+    correctAnswers
+    percentage
+    timeSpent
+    userAnswers
+    isCompleted
+    startedAt
+    completedAt
+    updatedAt
+    quiz {
+      id
+      title
+      slug
+      description
+      category
+      difficulty
+      featuredImage
+      tags
+    }
+    user {
+      id
+      username
+      email
+      firstName
+      lastName
+    }
+  }
+}

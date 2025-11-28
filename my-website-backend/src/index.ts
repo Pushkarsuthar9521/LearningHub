@@ -8,6 +8,7 @@ import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { BlogResolver } from './graphql/resolvers/blogResolver'
 import { HelloResolver } from './graphql/resolvers/helloResolver'
+import { QuizAttemptResolver } from './graphql/resolvers/quizAttemptsResolver'
 import { QuizResolver } from './graphql/resolvers/quizResolver'
 import { UserResolver } from './graphql/resolvers/userResolver'
 import { MyContext } from './types/MyContext'
@@ -22,7 +23,13 @@ const main = async () => {
   const PORT = env.PORT
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver, UserResolver, BlogResolver, QuizResolver],
+    resolvers: [
+      HelloResolver,
+      UserResolver,
+      BlogResolver,
+      QuizResolver,
+      QuizAttemptResolver
+    ],
     authChecker
   })
 

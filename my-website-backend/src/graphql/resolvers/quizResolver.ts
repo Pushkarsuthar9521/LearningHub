@@ -30,6 +30,23 @@ export class QuizResolver {
     })
   }
 
+  @Query(() => Quiz, { nullable: true })
+  async getQuizBySlug(@Arg('slug') slug: string): Promise<Quiz | null> {
+    return await Quiz.findOne({
+      where: { slug },
+      relations: ['author', 'questions', 'questions.answers']
+    })
+  }
+
+  @Query(() => Quiz)
+  async getQuizById(@Arg('id', () => ID) id: string): Promise<Quiz> {
+    const quiz = await Quiz.findOne({
+      where: { id },
+      relations: ['author', 'questions', 'questions.answers']
+    })
+    return quiz as Quiz
+  }
+
   @Authorized()
   @Mutation(() => Quiz)
   async createQuiz(

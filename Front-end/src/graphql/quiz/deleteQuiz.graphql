@@ -1,0 +1,3 @@
+mutation DeleteQuiz($id: ID!) {
+  deleteQuiz(id: $id)
+}

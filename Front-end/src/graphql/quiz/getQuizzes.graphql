@@ -1,5 +1,5 @@
-mutation CreateQuiz($input: QuizInput!, $questions: [QuestionInput!]!) {
-  createQuiz(input: $input, questions: $questions) {
+query GetQuizzes {
+  getQuizzes {
     id
     title
     slug
@@ -8,6 +8,7 @@ mutation CreateQuiz($input: QuizInput!, $questions: [QuestionInput!]!) {
     difficulty
     status
     timeLimit
+    totalAttempts
     totalQuestions
     featuredImage
     tags
@@ -16,8 +17,10 @@ mutation CreateQuiz($input: QuizInput!, $questions: [QuestionInput!]!) {
     author {
       id
       username
+      email
       firstName
       lastName
+      role
     }
     questions {
       id

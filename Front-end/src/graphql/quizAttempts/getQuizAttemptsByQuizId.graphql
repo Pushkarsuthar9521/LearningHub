@@ -1,0 +1,27 @@
+query GetQuizAttemptsByQuizId($quizId: ID!) {
+  getQuizAttemptsByQuizId(quizId: $quizId) {
+    id
+    score
+    totalQuestions
+    correctAnswers
+    percentage
+    timeSpent
+    userAnswers
+    isCompleted
+    startedAt
+    completedAt
+    updatedAt
+    quiz {
+      id
+      title
+      slug
+    }
+    user {
+      id
+      username
+      email
+      firstName
+      lastName
+    }
+  }
+}

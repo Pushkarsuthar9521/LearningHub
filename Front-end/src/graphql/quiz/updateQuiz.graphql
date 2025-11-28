@@ -1,0 +1,26 @@
+mutation UpdateQuiz($id: ID!, $input: QuizInput!) {
+  updateQuiz(id: $id, input: $input) {
+    id
+    title
+    slug
+    description
+    category
+    difficulty
+    status
+    timeLimit
+    totalAttempts
+    totalQuestions
+    featuredImage
+    tags
+    createdAt
+    updatedAt
+    author {
+      id
+      username
+      email
+      firstName
+      lastName
+      role
+    }
+  }
+}

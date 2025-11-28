@@ -1,0 +1,10 @@
+query GetQuizAttemptStats($userId: ID) {
+  getQuizAttemptStats(userId: $userId) {
+    totalAttempts
+    averageScore
+    averagePercentage
+    totalTimeSpent
+    bestScore
+    worstScore
+  }
+}
