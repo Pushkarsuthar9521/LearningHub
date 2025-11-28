@@ -207,13 +207,24 @@ const HomePage: FC = () => {
               <p className="text-xl mb-8 opacity-90">
                 Join our community of learners and expand your knowledge today!
               </p>
-              <Button
-                size="lg"
-                variant="primary"
-                className="bg-white text-blue-600 hover:bg-gray-100"
-              >
-                Sign Up for Free
-              </Button>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Button
+                  size="lg"
+                  variant="primary"
+                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold shadow-lg"
+                  onClick={() => (window.location.href = '/signup')}
+                >
+                  Sign Up for Free
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold"
+                  onClick={() => (window.location.href = '/login')}
+                >
+                  Already have an account? Login
+                </Button>
+              </div>
             </div>
           </div>
         </section>

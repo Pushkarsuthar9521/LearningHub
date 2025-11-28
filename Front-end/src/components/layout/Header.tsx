@@ -99,18 +99,39 @@ const Header: React.FC = () => {
             </button>
             {isAuthenticated && user ? (
               <Dropdown overlay={menu} placement="bottomRight">
-                <Avatar>
-                  {user.firstName ? (
-                    user.firstName.charAt(0).toUpperCase()
-                  ) : (
-                    <UserOutlined />
-                  )}
-                </Avatar>
+                <div className="flex items-center space-x-3 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Avatar className="bg-gradient-to-r from-blue-500 to-purple-600">
+                    {user.firstName ? (
+                      user.firstName.charAt(0).toUpperCase()
+                    ) : (
+                      <UserOutlined />
+                    )}
+                  </Avatar>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user.firstName || user.username}
+                    </p>
+                    <p className="text-xs text-gray-500">View Profile</p>
+                  </div>
+                </div>
               </Dropdown>
             ) : (
-              <Button type="primary" onClick={() => navigate('/signup')}>
-                Sign In
-              </Button>
+              <div className="flex items-center space-x-3">
+                <Button
+                  type="default"
+                  onClick={() => navigate('/login')}
+                  className="font-medium border-gray-300 hover:border-blue-500 hover:text-blue-600"
+                >
+                  Login
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => navigate('/signup')}
+                  className="font-medium bg-gradient-to-r from-blue-600 to-purple-600 border-0 hover:from-blue-700 hover:to-purple-700 shadow-md"
+                >
+                  Sign Up
+                </Button>
+              </div>
             )}
           </div>
 
@@ -169,40 +190,59 @@ const Header: React.FC = () => {
               Categories
             </Link>
             <div className="pt-4 pb-3 border-t border-gray-200">
-              <div className="flex items-center px-3">
+              <div className="px-3">
                 {isAuthenticated && user ? (
-                  <div className="flex items-center">
-                    <Avatar>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Avatar className="bg-gradient-to-r from-blue-500 to-purple-600">
                       {user.firstName ? (
                         user.firstName.charAt(0).toUpperCase()
                       ) : (
                         <UserOutlined />
                       )}
                     </Avatar>
-                    <div className="ml-3">
-                      <p className="text-base font-medium text-gray-800">
-                        {user.username}
+                    <div>
+                      <p className="text-base font-semibold text-gray-900">
+                        {user.firstName || user.username}
                       </p>
-                      <p className="text-sm font-medium text-gray-500">
-                        {user.email}
-                      </p>
+                      <p className="text-sm text-gray-500">{user.email}</p>
                     </div>
                   </div>
                 ) : (
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      navigate('/signup')
-                      setIsMenuOpen(false)
-                    }}
-                    style={{ width: '100%' }}
-                  >
-                    Sign In
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      type="default"
+                      onClick={() => {
+                        navigate('/login')
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full font-medium border-gray-300"
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        navigate('/signup')
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full font-medium bg-gradient-to-r from-blue-600 to-purple-600 border-0"
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
                 )}
               </div>
               {isAuthenticated && (
                 <div className="mt-3 px-2 space-y-1">
+                  {user?.role === UserRole.Admin && (
+                    <Link
+                      to="/admin"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <Link
                     to="/profile"
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
@@ -217,16 +257,15 @@ const Header: React.FC = () => {
                   >
                     Settings
                   </Link>
-                  <a
-                    href="#"
+                  <button
                     onClick={() => {
                       handleLogout()
                       setIsMenuOpen(false)
                     }}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 transition-colors"
                   >
-                    Sign out
-                  </a>
+                    Sign Out
+                  </button>
                 </div>
               )}
             </div>
