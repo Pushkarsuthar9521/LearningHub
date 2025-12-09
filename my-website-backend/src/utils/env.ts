@@ -25,6 +25,9 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().min(1).optional(),
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
 
+  // Cloudinary
+  CLOUDINARY_URL: z.string().min(1).optional(),
+
   // JWT configuration
 
   // Email config

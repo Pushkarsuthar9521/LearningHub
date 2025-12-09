@@ -2,7 +2,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: 'http://localhost:3012/graphql',
+  schema: 'http://localhost:9000/graphql',
   documents: 'src/graphql/**/*.graphql',
   generates: {
     'src/generated/graphql.ts': {
@@ -17,11 +17,11 @@ const config: CodegenConfig = {
         withHOC: false,
         scalars: {
           DateTimeISO: 'string',
-          JSONObject: 'Record<string, unknown>',
-        },
-      },
-    },
-  },
+          JSONObject: 'Record<string, unknown>'
+        }
+      }
+    }
+  }
 }
 
 export default config

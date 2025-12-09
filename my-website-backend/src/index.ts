@@ -8,6 +8,7 @@ import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { BlogResolver } from './graphql/resolvers/blogResolver'
 import { HelloResolver } from './graphql/resolvers/helloResolver'
+import { ImageUploadResolver } from './graphql/resolvers/imageUploadResolver'
 import { QuizAttemptResolver } from './graphql/resolvers/quizAttemptsResolver'
 import { QuizResolver } from './graphql/resolvers/quizResolver'
 import { UserResolver } from './graphql/resolvers/userResolver'
@@ -28,7 +29,8 @@ const main = async () => {
       UserResolver,
       BlogResolver,
       QuizResolver,
-      QuizAttemptResolver
+      QuizAttemptResolver,
+      ImageUploadResolver
     ],
     authChecker
   })

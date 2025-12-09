@@ -132,8 +132,8 @@ const CreateBlog: React.FC = () => {
 
           <Form.Item name="status" label="Status" initialValue="draft">
             <Select size="large">
-              <Option value="draft">Save as Draft</Option>
-              <Option value="published">Publish Now</Option>
+              <Option value="DRAFT">Save as Draft</Option>
+              <Option value="PUBLISHED">Publish Now</Option>
             </Select>
           </Form.Item>
 
