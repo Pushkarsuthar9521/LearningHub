@@ -1,11 +1,12 @@
 import dotenv from 'dotenv'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
+import { env } from './env'
 
 dotenv.config()
 
 // Use different paths for development (TypeScript) vs production (compiled JavaScript)
-const isDevelopment = process.env.NODE_ENV === 'development'
+const isDevelopment = env.NODE_ENV === 'development'
 const entityPath = isDevelopment
   ? 'src/entities/**/*.ts'
   : 'dist/entities/**/*.js'
@@ -18,10 +19,11 @@ const subscriberPath = isDevelopment
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: process.env.DATABASE_URL,
-  synchronize: isDevelopment, // Only auto-sync in development
-  logging: process.env.ENABLE_LOGGING === 'true',
+  url: env.DATABASE_URL,
+  synchronize: env.DB_SYNCHRONIZE, // Only auto-sync in development
+  logging: env.ENABLE_LOGGING,
   entities: [entityPath],
   migrations: [migrationPath],
-  subscribers: [subscriberPath]
+  subscribers: [subscriberPath],
+  ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 })

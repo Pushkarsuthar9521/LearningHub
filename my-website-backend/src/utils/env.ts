@@ -10,6 +10,7 @@ const envSchema = z.object({
     .default('development'),
   PORT: z.coerce.number().min(1).default(3012),
   DATABASE_URL: z.string().min(1),
+  DB_SYNCHRONIZE: z.coerce.boolean().default(false),
 
   // Optional variables
   REDIS_URL: z.string().optional(),
