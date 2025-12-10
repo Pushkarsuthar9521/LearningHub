@@ -34,5 +34,5 @@ RUN pnpm install --frozen-lockfile --prod
 # Copy compiled output from builder
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 4000
+EXPOSE 9000
 CMD ["node", "dist/index.js"]
