@@ -1,8 +1,9 @@
 import { UploadOutlined } from '@ant-design/icons'
 import { useMutation } from '@apollo/client'
 import { Button, Card, Form, Input, Select, Upload, message } from 'antd'
-import React from 'react'
+import React, { useState } from 'react'
 import { CreateQuizDocument, GetQuizzesDocument } from '../../generated/graphql'
+import { uploadImage } from '../../lib/upload'
 
 const { TextArea } = Input
 const { Option } = Select
@@ -14,15 +15,36 @@ interface QuizFormValues {
   difficulty: 'easy' | 'medium' | 'hard'
   timeLimit?: number
   tags?: string[]
-  featuredImage?: File[]
+  featuredImage?: any
   status: 'draft' | 'published' | 'archived'
 }
 
 const CreateQuiz: React.FC = () => {
   const [form] = Form.useForm()
+  const [imageUrl, setImageUrl] = useState<string>('')
+  const [uploadLoading, setUploadLoading] = useState(false)
+
   const [createQuiz, { loading }] = useMutation(CreateQuizDocument, {
     refetchQueries: [{ query: GetQuizzesDocument }]
   })
+
+  const handleUpload = async (file: File) => {
+    try {
+      setUploadLoading(true)
+      const url = await uploadImage(file)
+      if (url) {
+        setImageUrl(url)
+        message.success('Image uploaded successfully!')
+        return false // Prevent default upload behavior
+      }
+    } catch (error) {
+      message.error('Failed to upload image')
+      console.error(error)
+    } finally {
+      setUploadLoading(false)
+    }
+    return false
+  }
 
   const handleSubmit = async (values: QuizFormValues) => {
     try {
@@ -33,9 +55,10 @@ const CreateQuiz: React.FC = () => {
             description: values.description,
             category: values.category,
             difficulty: values.difficulty,
-            timeLimit: values.timeLimit,
+            timeLimit: values.timeLimit ? Number(values.timeLimit) : undefined,
             tags: values.tags,
-            status: values.status
+            status: values.status,
+            featuredImage: imageUrl || undefined
           },
           questions: [] // For now, empty questions - add question editor later
         }
@@ -44,6 +67,7 @@ const CreateQuiz: React.FC = () => {
         'Quiz created successfully! You can now add questions to it.'
       )
       form.resetFields()
+      setImageUrl('')
     } catch (error) {
       message.error('Failed to create quiz')
       console.error(error)
@@ -139,11 +163,29 @@ const CreateQuiz: React.FC = () => {
           </Form.Item>
 
           <Form.Item name="featuredImage" label="Featured Image">
-            <Upload listType="picture" maxCount={1} beforeUpload={() => false}>
-              <Button icon={<UploadOutlined />} size="large">
-                Upload Image
+            <Upload
+              listType="picture"
+              maxCount={1}
+              beforeUpload={handleUpload}
+              showUploadList={false}
+            >
+              <Button
+                icon={<UploadOutlined />}
+                size="large"
+                loading={uploadLoading}
+              >
+                {imageUrl ? 'Change Image' : 'Upload Image'}
               </Button>
             </Upload>
+            {imageUrl && (
+              <div className="mt-2">
+                <img
+                  src={imageUrl}
+                  alt="Featured"
+                  className="h-32 w-auto object-cover rounded"
+                />
+              </div>
+            )}
           </Form.Item>
 
           <Form.Item name="status" label="Status" initialValue="draft">

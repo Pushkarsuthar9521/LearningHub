@@ -125,6 +125,41 @@ const Header: React.FC = () => {
                   </span>
                 </Link>
 
+                <nav className="hidden md:flex items-center">
+                  <div className="flex items-center space-x-2 bg-gray-100/50 rounded-full px-2 py-1.5">
+                    <Link
+                      to="/blog"
+                      className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                        isActive('/blog')
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                          : 'text-gray-700 hover:bg-white/80 hover:text-blue-600'
+                      }`}
+                    >
+                      Blog
+                    </Link>
+                    <Link
+                      to="/quizzes"
+                      className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                        isActive('/quizzes')
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                          : 'text-gray-700 hover:bg-white/80 hover:text-blue-600'
+                      }`}
+                    >
+                      Quizzes
+                    </Link>
+                    <Link
+                      to="/categories"
+                      className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                        isActive('/categories')
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                          : 'text-gray-700 hover:bg-white/80 hover:text-blue-600'
+                      }`}
+                    >
+                      Categories
+                    </Link>
+                  </div>
+                </nav>
+
                 {/* Right section */}
                 <div className="hidden md:flex items-center space-x-3">
                   <button

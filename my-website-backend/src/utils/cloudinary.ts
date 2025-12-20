@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary'
+import streamifier from 'streamifier'
 
 // Configure using individual variables
 cloudinary.config({
@@ -8,15 +9,8 @@ cloudinary.config({
   secure: true
 })
 
-export interface FileUpload {
-  filename: string
-  mimetype: string
-  encoding: string
-  createReadStream: () => NodeJS.ReadableStream
-}
-
 export const uploadToCloudinary = async (
-  file: FileUpload,
+  buffer: Buffer,
   folder: string = 'blog-images'
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -28,12 +22,13 @@ export const uploadToCloudinary = async (
       },
       (error, result) => {
         if (error) {
+          console.error('Cloudinary upload error:', error)
           reject(error)
         } else {
-          resolve(result?.secure_url || 'N/A')
+          resolve(result?.secure_url || '')
         }
       }
     )
-    return file.createReadStream().pipe(uploadStream)
+    streamifier.createReadStream(buffer).pipe(uploadStream)
   })
 }
